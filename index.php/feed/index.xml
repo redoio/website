@@ -8,10 +8,10 @@
 	>
 
 <channel>
-	<title>Redo</title>
+	<title>Redo.io</title>
 	<atom:link href="./index.html" rel="self" type="application/rss+xml" />
 	<link>./../../index.html</link>
-	<description></description>
+	<description>Data science for justice reform</description>
 	<lastBuildDate>Fri, 23 Aug 2024 05:15:08 +0000</lastBuildDate>
 	<language>en-US</language>
 	<sy:updatePeriod>
@@ -19,6 +19,14 @@
 	<sy:updateFrequency>
 	1	</sy:updateFrequency>
 	<generator>https://wordpress.org/?v=6.6.1</generator>
+
+<image>
+	<url>./../../wp-content/uploads/2024/08/Redo-Logo-BW-2-e1725320038932-150x150.png</url>
+	<title>Redo.io</title>
+	<link>./../../index.html</link>
+	<width>32</width>
+	<height>32</height>
+</image> 
 	<item>
 		<title>Hello world!</title>
 		<link>./../2024/08/23/hello-world/index.html</link>
