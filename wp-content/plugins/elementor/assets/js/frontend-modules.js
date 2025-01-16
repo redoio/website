@@ -1,4 +1,4 @@
-/*! elementor - v3.24.0 - 10-09-2024 */
+/*! elementor - v3.26.0 - 07-01-2025 */
 (self["webpackChunkelementor"] = self["webpackChunkelementor"] || []).push([["frontend-modules"],{
 
 /***/ "../assets/dev/js/editor/utils/is-instanceof.js":
@@ -101,206 +101,6 @@ exports["default"] = _default;
 
 /***/ }),
 
-/***/ "../assets/dev/js/frontend/handlers/accessibility/nested-title-keyboard-handler.js":
-/*!*****************************************************************************************!*\
-  !*** ../assets/dev/js/frontend/handlers/accessibility/nested-title-keyboard-handler.js ***!
-  \*****************************************************************************************/
-/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
-
-"use strict";
-
-
-var _interopRequireDefault = __webpack_require__(/*! @babel/runtime/helpers/interopRequireDefault */ "../node_modules/@babel/runtime/helpers/interopRequireDefault.js");
-Object.defineProperty(exports, "__esModule", ({
-  value: true
-}));
-exports["default"] = void 0;
-var _base = _interopRequireDefault(__webpack_require__(/*! ../base */ "../assets/dev/js/frontend/handlers/base.js"));
-class NestedTitleKeyboardHandler extends _base.default {
-  __construct(settings) {
-    super.__construct(settings);
-    this.directionNext = 'next';
-    this.directionPrevious = 'previous';
-    this.focusableElementSelector = 'audio, button, canvas, details, iframe, input, select, summary, textarea, video, [accesskey], [contenteditable], [href], [tabindex]:not([tabindex="-1"])';
-  }
-  getWidgetNumber() {
-    return this.$element.find('> .elementor-widget-container > .e-n-tabs, > .e-n-tabs').attr('data-widget-number');
-  }
-  getDefaultSettings() {
-    return {
-      selectors: {
-        itemTitle: `[id*="e-n-tab-title-${this.getWidgetNumber()}"]`,
-        itemContainer: `[id*="e-n-tab-content-${this.getWidgetNumber()}"]`
-      },
-      ariaAttributes: {
-        titleStateAttribute: 'aria-selected',
-        activeTitleSelector: '[aria-selected="true"]'
-      },
-      datasets: {
-        titleIndex: 'data-tab-index'
-      },
-      keyDirection: {
-        ArrowLeft: elementorFrontendConfig.is_rtl ? this.directionNext : this.directionPrevious,
-        ArrowUp: this.directionPrevious,
-        ArrowRight: elementorFrontendConfig.is_rtl ? this.directionPrevious : this.directionNext,
-        ArrowDown: this.directionNext
-      }
-    };
-  }
-  getDefaultElements() {
-    const selectors = this.getSettings('selectors');
-    return {
-      $itemTitles: this.findElement(selectors.itemTitle),
-      $itemContainers: this.findElement(selectors.itemContainer),
-      $focusableContainerElements: this.getFocusableElements(this.findElement(selectors.itemContainer))
-    };
-  }
-  getFocusableElements($elements) {
-    return $elements.find(this.focusableElementSelector).not('[disabled], [inert]');
-  }
-  getKeyDirectionValue(event) {
-    const direction = this.getSettings('keyDirection')[event.key];
-    return this.directionNext === direction ? 1 : -1;
-  }
-
-  /**
-   * @param {HTMLElement} itemTitleElement
-   *
-   * @return {string}
-   */
-  getTitleIndex(itemTitleElement) {
-    const {
-      titleIndex: indexAttribute
-    } = this.getSettings('datasets');
-    return itemTitleElement.getAttribute(indexAttribute);
-  }
-
-  /**
-   * @param {string|number} titleIndex
-   *
-   * @return {string}
-   */
-  getTitleFilterSelector(titleIndex) {
-    const {
-      titleIndex: indexAttribute
-    } = this.getSettings('datasets');
-    return `[${indexAttribute}="${titleIndex}"]`;
-  }
-  getActiveTitleElement() {
-    const activeTitleFilter = this.getSettings('ariaAttributes').activeTitleSelector;
-    return this.elements.$itemTitles.filter(activeTitleFilter);
-  }
-  onInit() {
-    super.onInit(...arguments);
-  }
-  bindEvents() {
-    this.elements.$itemTitles.on(this.getTitleEvents());
-    this.elements.$focusableContainerElements.on(this.getContentElementEvents());
-  }
-  unbindEvents() {
-    this.elements.$itemTitles.off(this.getTitleEvents());
-    this.elements.$focusableContainerElements.children().off(this.getContentElementEvents());
-  }
-  getTitleEvents() {
-    return {
-      keydown: this.handleTitleKeyboardNavigation.bind(this)
-    };
-  }
-  getContentElementEvents() {
-    return {
-      keydown: this.handleContentElementKeyboardNavigation.bind(this)
-    };
-  }
-  isDirectionKey(event) {
-    const directionKeys = ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Home', 'End'];
-    return directionKeys.includes(event.key);
-  }
-  isActivationKey(event) {
-    const activationKeys = ['Enter', ' '];
-    return activationKeys.includes(event.key);
-  }
-  handleTitleKeyboardNavigation(event) {
-    if (this.isDirectionKey(event)) {
-      event.preventDefault();
-      const currentTitleIndex = parseInt(this.getTitleIndex(event.currentTarget)) || 1,
-        numberOfTitles = this.elements.$itemTitles.length,
-        titleIndexUpdated = this.getTitleIndexFocusUpdated(event, currentTitleIndex, numberOfTitles);
-      this.changeTitleFocus(titleIndexUpdated);
-      event.stopPropagation();
-    } else if (this.isActivationKey(event)) {
-      event.preventDefault();
-      if (this.handeTitleLinkEnterOrSpaceEvent(event)) {
-        return;
-      }
-      const titleIndex = this.getTitleIndex(event.currentTarget);
-      elementorFrontend.elements.$window.trigger('elementor/nested-elements/activate-by-keyboard', {
-        widgetId: this.getID(),
-        titleIndex
-      });
-    } else if ('Escape' === event.key) {
-      this.handleTitleEscapeKeyEvents(event);
-    }
-  }
-  handeTitleLinkEnterOrSpaceEvent(event) {
-    const isLinkElement = 'a' === event?.currentTarget?.tagName?.toLowerCase();
-    if (!elementorFrontend.isEditMode() && isLinkElement) {
-      event?.currentTarget?.click();
-      event.stopPropagation();
-    }
-    return isLinkElement;
-  }
-  getTitleIndexFocusUpdated(event, currentTitleIndex, numberOfTitles) {
-    let titleIndexUpdated = 0;
-    switch (event.key) {
-      case 'Home':
-        titleIndexUpdated = 1;
-        break;
-      case 'End':
-        titleIndexUpdated = numberOfTitles;
-        break;
-      default:
-        const directionValue = this.getKeyDirectionValue(event),
-          isEndReached = numberOfTitles < currentTitleIndex + directionValue,
-          isStartReached = 0 === currentTitleIndex + directionValue;
-        if (isEndReached) {
-          titleIndexUpdated = 1;
-        } else if (isStartReached) {
-          titleIndexUpdated = numberOfTitles;
-        } else {
-          titleIndexUpdated = currentTitleIndex + directionValue;
-        }
-    }
-    return titleIndexUpdated;
-  }
-  changeTitleFocus(titleIndexUpdated) {
-    const $newTitle = this.elements.$itemTitles.filter(this.getTitleFilterSelector(titleIndexUpdated));
-    this.setTitleTabindex(titleIndexUpdated);
-    $newTitle.trigger('focus');
-  }
-  setTitleTabindex(titleIndex) {
-    this.elements.$itemTitles.attr('tabindex', '-1');
-    const $newTitle = this.elements.$itemTitles.filter(this.getTitleFilterSelector(titleIndex));
-    $newTitle.attr('tabindex', '0');
-  }
-  handleTitleEscapeKeyEvents() {}
-  handleContentElementKeyboardNavigation(event) {
-    if ('Tab' === event.key && !event.shiftKey) {
-      this.handleContentElementTabEvents(event);
-    } else if ('Escape' === event.key) {
-      event.preventDefault();
-      event.stopPropagation();
-      this.handleContentElementEscapeEvents(event);
-    }
-  }
-  handleContentElementEscapeEvents() {
-    this.getActiveTitleElement().trigger('focus');
-  }
-  handleContentElementTabEvents() {}
-}
-exports["default"] = NestedTitleKeyboardHandler;
-
-/***/ }),
-
 /***/ "../assets/dev/js/frontend/handlers/base-carousel.js":
 /*!***********************************************************!*\
   !*** ../assets/dev/js/frontend/handlers/base-carousel.js ***!
@@ -320,7 +120,7 @@ class CarouselHandlerBase extends _baseSwiper.default {
   getDefaultSettings() {
     return {
       selectors: {
-        carousel: `.${elementorFrontend.config.swiperClass}`,
+        carousel: '.swiper',
         swiperWrapper: '.swiper-wrapper',
         slideContent: '.swiper-slide',
         swiperArrow: '.elementor-swiper-button',
@@ -405,7 +205,7 @@ class CarouselHandlerBase extends _baseSwiper.default {
         type: !!elementSettings.pagination ? elementSettings.pagination : 'bullets',
         clickable: true,
         renderBullet: (index, classname) => {
-          return `<span class="${classname}" data-bullet-index="${index}" aria-label="${elementorFrontend.config.i18n.a11yCarouselPaginationBulletMessage} ${index + 1}"></span>`;
+          return `<span class="${classname}" role="button" tabindex="0" data-bullet-index="${index}" aria-label="${elementorFrontend.config.i18n.a11yCarouselPaginationBulletMessage} ${index + 1}"></span>`;
         }
       };
     }
@@ -423,15 +223,12 @@ class CarouselHandlerBase extends _baseSwiper.default {
       lastSlideMessage: elementorFrontend.config.i18n.a11yCarouselLastSlideMessage
     };
     swiperOptions.on = {
-      slideChangeTransitionEnd: () => {
-        this.a11ySetSlideAriaHidden();
-      },
       slideChange: () => {
         this.a11ySetPaginationTabindex();
         this.handleElementHandlers();
+        this.a11ySetSlideAriaHidden();
       },
       init: () => {
-        this.a11ySetWidgetAriaDetails();
         this.a11ySetPaginationTabindex();
         this.a11ySetSlideAriaHidden('initialisation');
       }
@@ -543,7 +340,6 @@ class CarouselHandlerBase extends _baseSwiper.default {
       arrows_position: 'arrows_position' // Not a Swiper setting.
     };
   }
-
   onElementChange(propertyName) {
     if (0 === propertyName.indexOf('image_spacing_custom')) {
       this.updateSpaceBetween(propertyName);
@@ -567,7 +363,8 @@ class CarouselHandlerBase extends _baseSwiper.default {
   }
   getSpaceBetween() {
     let device = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : null;
-    return elementorFrontend.utils.controls.getResponsiveControlValue(this.getElementSettings(), 'image_spacing_custom', 'size', device) || 0;
+    const responsiveControlValue = elementorFrontend.utils.controls.getResponsiveControlValue(this.getElementSettings(), 'image_spacing_custom', 'size', device);
+    return Number(responsiveControlValue) || 0;
   }
   updateSpaceBetween(propertyName) {
     const deviceMatch = propertyName.match('image_spacing_custom_(.*)'),
@@ -583,11 +380,6 @@ class CarouselHandlerBase extends _baseSwiper.default {
     let type = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 'array';
     const paginationBullets = this.$element.find(this.getSettings('selectors').paginationBullet);
     return 'array' === type ? Array.from(paginationBullets) : paginationBullets;
-  }
-  a11ySetWidgetAriaDetails() {
-    const $widget = this.$element;
-    $widget.attr('aria-roledescription', 'carousel');
-    $widget.attr('aria-label', elementorFrontend.config.i18n.a11yCarouselWrapperAriaLabel);
   }
   a11ySetPaginationTabindex() {
     const bulletClass = this.swiper?.params?.pagination.bulletClass,
@@ -698,11 +490,12 @@ exports["default"] = SwiperHandlerBase;
 /*!**************************************************!*\
   !*** ../assets/dev/js/frontend/handlers/base.js ***!
   \**************************************************/
-/***/ ((module) => {
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 "use strict";
 
 
+__webpack_require__(/*! core-js/modules/es.array.push.js */ "../node_modules/core-js/modules/es.array.push.js");
 module.exports = elementorModules.ViewModule.extend({
   $element: null,
   editorListeners: null,
@@ -1016,10 +809,6 @@ var _base = _interopRequireDefault(__webpack_require__(/*! ./handlers/base */ ".
 var _baseSwiper = _interopRequireDefault(__webpack_require__(/*! ./handlers/base-swiper */ "../assets/dev/js/frontend/handlers/base-swiper.js"));
 var _baseCarousel = _interopRequireDefault(__webpack_require__(/*! ./handlers/base-carousel */ "../assets/dev/js/frontend/handlers/base-carousel.js"));
 var _nestedTabs = _interopRequireDefault(__webpack_require__(/*! elementor/modules/nested-tabs/assets/js/frontend/handlers/nested-tabs */ "../modules/nested-tabs/assets/js/frontend/handlers/nested-tabs.js"));
-var _nestedAccordion = _interopRequireDefault(__webpack_require__(/*! elementor/modules/nested-accordion/assets/js/frontend/handlers/nested-accordion */ "../modules/nested-accordion/assets/js/frontend/handlers/nested-accordion.js"));
-var _contactButtons = _interopRequireDefault(__webpack_require__(/*! elementor/modules/floating-buttons/assets/js/floating-buttons/frontend/handlers/contact-buttons */ "../modules/floating-buttons/assets/js/floating-buttons/frontend/handlers/contact-buttons.js"));
-var _floatingBars = _interopRequireDefault(__webpack_require__(/*! elementor/modules/floating-buttons/assets/js/floating-bars/frontend/handlers/floating-bars */ "../modules/floating-buttons/assets/js/floating-bars/frontend/handlers/floating-bars.js"));
-var _nestedTitleKeyboardHandler = _interopRequireDefault(__webpack_require__(/*! ./handlers/accessibility/nested-title-keyboard-handler */ "../assets/dev/js/frontend/handlers/accessibility/nested-title-keyboard-handler.js"));
 _modules.default.frontend = {
   Document: _document.default,
   tools: {
@@ -1030,11 +819,7 @@ _modules.default.frontend = {
     StretchedElement: _stretchedElement.default,
     SwiperBase: _baseSwiper.default,
     CarouselBase: _baseCarousel.default,
-    NestedTabs: _nestedTabs.default,
-    NestedAccordion: _nestedAccordion.default,
-    NestedTitleKeyboardHandler: _nestedTitleKeyboardHandler.default,
-    ContactButtonsHandler: _contactButtons.default,
-    FloatingBarsHandler: _floatingBars.default
+    NestedTabs: _nestedTabs.default
   }
 };
 
@@ -1259,7 +1044,6 @@ Object.defineProperty(exports, "__esModule", ({
   value: true
 }));
 exports["default"] = void 0;
-__webpack_require__(/*! core-js/modules/es.error.cause.js */ "../node_modules/core-js/modules/es.error.cause.js");
 var _instanceType = _interopRequireDefault(__webpack_require__(/*! ./instance-type */ "../assets/dev/js/modules/imports/instance-type.js"));
 var _isInstanceof = _interopRequireDefault(__webpack_require__(/*! ../../editor/utils/is-instanceof */ "../assets/dev/js/editor/utils/is-instanceof.js"));
 class ArgsObject extends _instanceType.default {
@@ -1373,7 +1157,7 @@ Object.defineProperty(exports, "__esModule", ({
   value: true
 }));
 exports["default"] = exports.ForceMethodImplementation = void 0;
-__webpack_require__(/*! core-js/modules/es.error.cause.js */ "../node_modules/core-js/modules/es.error.cause.js");
+__webpack_require__(/*! core-js/modules/es.array.includes.js */ "../node_modules/core-js/modules/es.array.includes.js");
 // TODO: Wrong location used as `elementorModules.ForceMethodImplementation(); should be` `elementorUtils.forceMethodImplementation()`;
 
 class ForceMethodImplementation extends Error {
@@ -1415,7 +1199,7 @@ exports["default"] = _default;
 /*!*********************************************************!*\
   !*** ../assets/dev/js/modules/imports/instance-type.js ***!
   \*********************************************************/
-/***/ ((__unused_webpack_module, exports) => {
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 "use strict";
 
@@ -1424,6 +1208,7 @@ Object.defineProperty(exports, "__esModule", ({
   value: true
 }));
 exports["default"] = void 0;
+__webpack_require__(/*! core-js/modules/es.array.push.js */ "../node_modules/core-js/modules/es.array.push.js");
 class InstanceType {
   static [Symbol.hasInstance](target) {
     /**
@@ -1486,7 +1271,7 @@ exports["default"] = InstanceType;
 "use strict";
 
 
-__webpack_require__(/*! core-js/modules/es.error.cause.js */ "../node_modules/core-js/modules/es.error.cause.js");
+__webpack_require__(/*! core-js/modules/es.array.push.js */ "../node_modules/core-js/modules/es.array.push.js");
 const Module = function () {
   const $ = jQuery,
     instanceParams = arguments,
@@ -1656,8 +1441,9 @@ Object.defineProperty(exports, "__esModule", ({
   value: true
 }));
 exports["default"] = void 0;
+__webpack_require__(/*! core-js/modules/es.array.push.js */ "../node_modules/core-js/modules/es.array.push.js");
 var _viewModule = _interopRequireDefault(__webpack_require__(/*! ../view-module */ "../assets/dev/js/modules/imports/view-module.js"));
-var _default = _viewModule.default.extend({
+var _default = exports["default"] = _viewModule.default.extend({
   getDefaultSettings() {
     return {
       container: null,
@@ -1696,7 +1482,6 @@ var _default = _viewModule.default.extend({
     });
   }
 });
-exports["default"] = _default;
 
 /***/ }),
 
@@ -1704,7 +1489,7 @@ exports["default"] = _default;
 /*!********************************************************!*\
   !*** ../assets/dev/js/modules/imports/utils/scroll.js ***!
   \********************************************************/
-/***/ ((__unused_webpack_module, exports) => {
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 "use strict";
 
@@ -1713,6 +1498,7 @@ Object.defineProperty(exports, "__esModule", ({
   value: true
 }));
 exports["default"] = void 0;
+__webpack_require__(/*! core-js/modules/es.array.push.js */ "../node_modules/core-js/modules/es.array.push.js");
 // Moved from elementor pro: 'assets/dev/js/frontend/utils'
 class Scroll {
   /**
@@ -1819,7 +1605,7 @@ Object.defineProperty(exports, "__esModule", ({
 }));
 exports["default"] = void 0;
 var _module = _interopRequireDefault(__webpack_require__(/*! ./module */ "../assets/dev/js/modules/imports/module.js"));
-var _default = _module.default.extend({
+var _default = exports["default"] = _module.default.extend({
   elements: null,
   getDefaultElements() {
     return {};
@@ -1833,7 +1619,6 @@ var _default = _module.default.extend({
     this.elements = this.getDefaultElements();
   }
 });
-exports["default"] = _default;
 
 /***/ }),
 
@@ -1857,7 +1642,7 @@ var _argsObject = _interopRequireDefault(__webpack_require__(/*! ./imports/args-
 var _masonry = _interopRequireDefault(__webpack_require__(/*! ./imports/utils/masonry */ "../assets/dev/js/modules/imports/utils/masonry.js"));
 var _scroll = _interopRequireDefault(__webpack_require__(/*! ./imports/utils/scroll */ "../assets/dev/js/modules/imports/utils/scroll.js"));
 var _forceMethodImplementation = _interopRequireDefault(__webpack_require__(/*! ./imports/force-method-implementation */ "../assets/dev/js/modules/imports/force-method-implementation.js"));
-var _default = window.elementorModules = {
+var _default = exports["default"] = window.elementorModules = {
   Module: _module.default,
   ViewModule: _viewModule.default,
   ArgsObject: _argsObject.default,
@@ -1867,965 +1652,6 @@ var _default = window.elementorModules = {
     Scroll: _scroll.default
   }
 };
-exports["default"] = _default;
-
-/***/ }),
-
-/***/ "../modules/floating-buttons/assets/js/floating-bars/frontend/classes/floatin-bar-dom.js":
-/*!***********************************************************************************************!*\
-  !*** ../modules/floating-buttons/assets/js/floating-bars/frontend/classes/floatin-bar-dom.js ***!
-  \***********************************************************************************************/
-/***/ ((__unused_webpack_module, exports) => {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", ({
-  value: true
-}));
-exports["default"] = void 0;
-class FloatingBarDomHelper {
-  constructor($element) {
-    this.$element = $element;
-  }
-  maybeMoveToTop() {
-    const el = this.$element[0];
-    const widget = el.querySelector('.e-floating-bars');
-    if (elementorFrontend.isEditMode()) {
-      widget.classList.add('is-sticky');
-      return;
-    }
-    if (el.dataset.widget_type.startsWith('floating-bars') && widget.classList.contains('has-vertical-position-top') && !widget.classList.contains('is-sticky')) {
-      const wpAdminBar = document.getElementById('wpadminbar');
-      const elementToInsert = el.closest('.elementor');
-      if (wpAdminBar) {
-        wpAdminBar.after(elementToInsert);
-      } else {
-        document.body.prepend(elementToInsert);
-      }
-    }
-  }
-}
-exports["default"] = FloatingBarDomHelper;
-
-/***/ }),
-
-/***/ "../modules/floating-buttons/assets/js/floating-bars/frontend/handlers/floating-bars.js":
-/*!**********************************************************************************************!*\
-  !*** ../modules/floating-buttons/assets/js/floating-bars/frontend/handlers/floating-bars.js ***!
-  \**********************************************************************************************/
-/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
-
-"use strict";
-
-
-var _interopRequireDefault = __webpack_require__(/*! @babel/runtime/helpers/interopRequireDefault */ "../node_modules/@babel/runtime/helpers/interopRequireDefault.js");
-Object.defineProperty(exports, "__esModule", ({
-  value: true
-}));
-exports["default"] = void 0;
-var _base = _interopRequireDefault(__webpack_require__(/*! elementor-frontend/handlers/base */ "../assets/dev/js/frontend/handlers/base.js"));
-var _floatinBarDom = _interopRequireDefault(__webpack_require__(/*! ../classes/floatin-bar-dom */ "../modules/floating-buttons/assets/js/floating-bars/frontend/classes/floatin-bar-dom.js"));
-var _clickTracking = _interopRequireDefault(__webpack_require__(/*! ../../../shared/frontend/handlers/click-tracking */ "../modules/floating-buttons/assets/js/shared/frontend/handlers/click-tracking.js"));
-class FloatingBarsHandler extends _base.default {
-  getDefaultSettings() {
-    return {
-      selectors: {
-        main: '.e-floating-bars',
-        closeButton: '.e-floating-bars__close-button',
-        ctaButton: '.e-floating-bars__cta-button'
-      },
-      constants: {
-        ctaEntranceAnimation: 'style_cta_button_animation',
-        ctaEntranceAnimationDelay: 'style_cta_button_animation_delay',
-        hasEntranceAnimation: 'has-entrance-animation',
-        visible: 'visible',
-        isSticky: 'is-sticky',
-        hasVerticalPositionTop: 'has-vertical-position-top',
-        hasVerticalPositionBottom: 'has-vertical-position-bottom',
-        isHidden: 'is-hidden',
-        animated: 'animated'
-      }
-    };
-  }
-  getDefaultElements() {
-    const selectors = this.getSettings('selectors');
-    return {
-      main: this.$element[0].querySelector(selectors.main),
-      mainAll: this.$element[0].querySelectorAll(selectors.main),
-      closeButton: this.$element[0].querySelector(selectors.closeButton),
-      ctaButton: this.$element[0].querySelector(selectors.ctaButton)
-    };
-  }
-  onElementChange(property) {
-    const changedProperties = ['advanced_vertical_position'];
-    if (changedProperties.includes(property)) {
-      this.initDefaultState();
-    }
-  }
-  getResponsiveSetting(controlName) {
-    const currentDevice = elementorFrontend.getCurrentDeviceMode();
-    return elementorFrontend.utils.controls.getResponsiveControlValue(this.getElementSettings(), controlName, '', currentDevice);
-  }
-  bindEvents() {
-    if (this.elements.closeButton) {
-      this.elements.closeButton.addEventListener('click', this.closeFloatingBar.bind(this));
-    }
-    if (this.elements.ctaButton) {
-      this.elements.ctaButton.addEventListener('animationend', this.handleAnimationEnd.bind(this));
-    }
-    if (this.elements.main) {
-      window.addEventListener('keyup', this.onDocumentKeyup.bind(this));
-    }
-    if (this.hasStickyElements()) {
-      window.addEventListener('resize', this.handleStickyElements.bind(this));
-    }
-  }
-  isStickyTop() {
-    const {
-      isSticky,
-      hasVerticalPositionTop
-    } = this.getSettings('constants');
-    return this.elements.main.classList.contains(isSticky) && this.elements.main.classList.contains(hasVerticalPositionTop);
-  }
-  isStickyBottom() {
-    const {
-      isSticky,
-      hasVerticalPositionBottom
-    } = this.getSettings('constants');
-    return this.elements.main.classList.contains(isSticky) && this.elements.main.classList.contains(hasVerticalPositionBottom);
-  }
-  hasStickyElements() {
-    const stickyElements = document.querySelectorAll('.elementor-sticky');
-    return stickyElements.length > 0;
-  }
-  focusOnLoad() {
-    this.elements.main.setAttribute('tabindex', '0');
-    this.elements.main.focus({
-      focusVisible: true
-    });
-  }
-  applyBodyPadding() {
-    const mainHeight = this.elements.main.offsetHeight;
-    document.body.style.paddingTop = `${mainHeight}px`;
-  }
-  removeBodyPadding() {
-    document.body.style.paddingTop = '0';
-  }
-  handleWPAdminBar() {
-    const wpAdminBar = elementorFrontend.elements.$wpAdminBar;
-    if (wpAdminBar.length) {
-      this.elements.main.style.top = `${wpAdminBar.height()}px`;
-    }
-  }
-  handleStickyElements() {
-    const mainHeight = this.elements.main.offsetHeight;
-    const wpAdminBar = elementorFrontend.elements.$wpAdminBar;
-    const stickyElements = document.querySelectorAll('.elementor-sticky:not(.elementor-sticky__spacer)');
-    if (0 === stickyElements.length) {
-      return;
-    }
-    stickyElements.forEach(stickyElement => {
-      const dataSettings = stickyElement.getAttribute('data-settings');
-      const stickyPosition = JSON.parse(dataSettings)?.sticky;
-      const isTop = '0px' === stickyElement.style.top || 'top' === stickyPosition;
-      const isBottom = '0px' === stickyElement.style.bottom || 'bottom' === stickyPosition;
-      if (this.isStickyTop() && isTop) {
-        if (wpAdminBar.length) {
-          stickyElement.style.top = `${mainHeight + wpAdminBar.height()}px`;
-        } else {
-          stickyElement.style.top = `${mainHeight}px`;
-        }
-      } else if (this.isStickyBottom() && isBottom) {
-        stickyElement.style.bottom = `${mainHeight}px`;
-      }
-      if (elementorFrontend.isEditMode()) {
-        if (isTop) {
-          stickyElement.style.top = this.isStickyTop() ? `${mainHeight}px` : '0px';
-        } else if (isBottom) {
-          stickyElement.style.bottom = this.isStickyBottom() ? `${mainHeight}px` : '0px';
-        }
-      }
-    });
-    document.querySelectorAll('.elementor-sticky__spacer').forEach(stickySpacer => {
-      const dataSettings = stickySpacer.getAttribute('data-settings');
-      const stickyPosition = JSON.parse(dataSettings)?.sticky;
-      const isTop = '0px' === stickySpacer.style.top || 'top' === stickyPosition;
-      if (this.isStickyTop() && isTop) {
-        stickySpacer.style.marginBottom = `${mainHeight}px`;
-      }
-    });
-  }
-  closeFloatingBar() {
-    const {
-      isHidden
-    } = this.getSettings('constants');
-    if (!elementorFrontend.isEditMode()) {
-      this.elements.main.classList.add(isHidden);
-      if (this.hasStickyElements()) {
-        this.handleStickyElements();
-      } else if (this.isStickyTop()) {
-        this.removeBodyPadding();
-      }
-    }
-  }
-  initEntranceAnimation() {
-    const {
-      animated,
-      ctaEntranceAnimation,
-      ctaEntranceAnimationDelay,
-      hasEntranceAnimation
-    } = this.getSettings('constants');
-    const entranceAnimationClass = this.getResponsiveSetting(ctaEntranceAnimation);
-    const entranceAnimationDelay = this.getResponsiveSetting(ctaEntranceAnimationDelay) || 0;
-    const setTimeoutDelay = entranceAnimationDelay + 500;
-    this.elements.ctaButton.classList.add(animated);
-    this.elements.ctaButton.classList.add(entranceAnimationClass);
-    setTimeout(() => {
-      this.elements.ctaButton.classList.remove(hasEntranceAnimation);
-    }, setTimeoutDelay);
-  }
-  handleAnimationEnd() {
-    this.removeEntranceAnimationClasses();
-    this.focusOnLoad();
-  }
-  removeEntranceAnimationClasses() {
-    if (!this.elements.ctaButton) {
-      return;
-    }
-    const {
-      animated,
-      ctaEntranceAnimation,
-      visible
-    } = this.getSettings('constants');
-    const entranceAnimationClass = this.getResponsiveSetting(ctaEntranceAnimation);
-    this.elements.ctaButton.classList.remove(animated);
-    this.elements.ctaButton.classList.remove(entranceAnimationClass);
-    this.elements.ctaButton.classList.add(visible);
-  }
-  onDocumentKeyup(event) {
-    // Bail if not ESC key
-    if (event.keyCode !== 27 || !this.elements.main) {
-      return;
-    }
-
-    /* eslint-disable @wordpress/no-global-active-element */
-    if (this.elements.main.contains(document.activeElement)) {
-      this.closeFloatingBar();
-    }
-    /* eslint-enable @wordpress/no-global-active-element */
-  }
-
-  initDefaultState() {
-    const {
-      hasEntranceAnimation
-    } = this.getSettings('constants');
-    if (this.isStickyTop()) {
-      this.handleWPAdminBar();
-    }
-    if (this.hasStickyElements()) {
-      this.handleStickyElements();
-    } else if (this.isStickyTop()) {
-      this.applyBodyPadding();
-    }
-    if (this.elements.main && !this.elements.ctaButton.classList.contains(hasEntranceAnimation) && !elementorFrontend.isEditMode()) {
-      this.focusOnLoad();
-    }
-  }
-  setupInnerContainer() {
-    this.elements.main.closest('.e-con-inner').classList.add('e-con-inner--floating-bars');
-    this.elements.main.closest('.e-con').classList.add('e-con--floating-bars');
-  }
-  onInit() {
-    const {
-      hasEntranceAnimation
-    } = this.getSettings('constants');
-    super.onInit(...arguments);
-    this.clickTrackingHandler = new _clickTracking.default({
-      $element: this.$element
-    });
-    const domHelper = new _floatinBarDom.default(this.$element);
-    domHelper.maybeMoveToTop();
-    if (this.elements.ctaButton && this.elements.ctaButton.classList.contains(hasEntranceAnimation)) {
-      this.initEntranceAnimation();
-    }
-    this.initDefaultState();
-    this.setupInnerContainer();
-  }
-}
-exports["default"] = FloatingBarsHandler;
-
-/***/ }),
-
-/***/ "../modules/floating-buttons/assets/js/floating-buttons/frontend/handlers/contact-buttons.js":
-/*!***************************************************************************************************!*\
-  !*** ../modules/floating-buttons/assets/js/floating-buttons/frontend/handlers/contact-buttons.js ***!
-  \***************************************************************************************************/
-/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
-
-"use strict";
-
-
-var _interopRequireDefault = __webpack_require__(/*! @babel/runtime/helpers/interopRequireDefault */ "../node_modules/@babel/runtime/helpers/interopRequireDefault.js");
-Object.defineProperty(exports, "__esModule", ({
-  value: true
-}));
-exports["default"] = void 0;
-var _base = _interopRequireDefault(__webpack_require__(/*! elementor-frontend/handlers/base */ "../assets/dev/js/frontend/handlers/base.js"));
-var _clickTracking = _interopRequireDefault(__webpack_require__(/*! ../../../shared/frontend/handlers/click-tracking */ "../modules/floating-buttons/assets/js/shared/frontend/handlers/click-tracking.js"));
-class ContactButtonsHandler extends _base.default {
-  getDefaultSettings() {
-    return {
-      selectors: {
-        main: '.e-contact-buttons',
-        content: '.e-contact-buttons__content',
-        contentWrapper: '.e-contact-buttons__content-wrapper',
-        chatButton: '.e-contact-buttons__chat-button',
-        closeButton: '.e-contact-buttons__close-button',
-        messageBubbleTime: '.e-contact-buttons__message-bubble-time'
-      },
-      constants: {
-        entranceAnimation: 'style_chat_box_entrance_animation',
-        exitAnimation: 'style_chat_box_exit_animation',
-        chatButtonAnimation: 'style_chat_button_animation',
-        animated: 'animated',
-        animatedWrapper: 'animated-wrapper',
-        visible: 'visible',
-        reverse: 'reverse',
-        hidden: 'hidden',
-        hasAnimations: 'has-animations',
-        hasEntranceAnimation: 'has-entrance-animation',
-        none: 'none'
-      }
-    };
-  }
-  getDefaultElements() {
-    const selectors = this.getSettings('selectors');
-    return {
-      main: this.$element[0].querySelector(selectors.main),
-      content: this.$element[0].querySelector(selectors.content),
-      contentWrapper: this.$element[0].querySelector(selectors.contentWrapper),
-      chatButton: this.$element[0].querySelector(selectors.chatButton),
-      closeButton: this.$element[0].querySelector(selectors.closeButton),
-      messageBubbleTime: this.$element[0].querySelector(selectors.messageBubbleTime)
-    };
-  }
-  getResponsiveSetting(controlName) {
-    const currentDevice = elementorFrontend.getCurrentDeviceMode();
-    return elementorFrontend.utils.controls.getResponsiveControlValue(this.getElementSettings(), controlName, '', currentDevice);
-  }
-  bindEvents() {
-    if (this.elements.closeButton) {
-      this.elements.closeButton.addEventListener('click', this.closeChatBox.bind(this));
-    }
-    if (this.elements.chatButton) {
-      this.elements.chatButton.addEventListener('click', this.onChatButtonClick.bind(this));
-      this.elements.chatButton.addEventListener('animationend', this.removeChatButtonAnimationClasses.bind(this));
-    }
-    if (this.elements.content) {
-      this.elements.content.addEventListener('animationend', this.removeAnimationClasses.bind(this));
-    }
-    if (this.elements.contentWrapper) {
-      window.addEventListener('keyup', this.onDocumentKeyup.bind(this));
-    }
-  }
-  contentWrapperIsHidden(hide) {
-    if (!this.elements.contentWrapper) {
-      return false;
-    }
-    const {
-      hidden
-    } = this.getSettings('constants');
-
-    // Set current state
-    if (true === hide) {
-      this.elements.contentWrapper.classList.add(hidden);
-      this.elements.contentWrapper.setAttribute('aria-hidden', 'true');
-      return;
-    }
-    if (false === hide) {
-      this.elements.contentWrapper.classList.remove(hidden);
-      this.elements.contentWrapper.setAttribute('aria-hidden', 'false');
-      return;
-    }
-
-    // Get current state
-    return this.elements.contentWrapper.classList.contains(hidden);
-  }
-  onDocumentKeyup(event) {
-    // Bail if not ESC key
-    if (event.keyCode !== 27 || !this.elements.main) {
-      return;
-    }
-
-    /* eslint-disable @wordpress/no-global-active-element */
-    if (!this.contentWrapperIsHidden() && this.elements.main.contains(document.activeElement)) {
-      this.closeChatBox();
-    }
-    /* eslint-enable @wordpress/no-global-active-element */
-  }
-
-  removeAnimationClasses() {
-    if (!this.elements.content) {
-      return;
-    }
-    const {
-      reverse,
-      entranceAnimation,
-      exitAnimation,
-      animated,
-      visible
-    } = this.getSettings('constants');
-    const isExitAnimation = this.elements.content.classList.contains(reverse),
-      openAnimationClass = this.getResponsiveSetting(entranceAnimation),
-      exitAnimationClass = this.getResponsiveSetting(exitAnimation);
-    if (isExitAnimation) {
-      this.elements.content.classList.remove(animated);
-      this.elements.content.classList.remove(reverse);
-      if (exitAnimationClass) {
-        this.elements.content.classList.remove(exitAnimationClass);
-      }
-      this.elements.content.classList.remove(visible);
-    } else {
-      this.elements.content.classList.remove(animated);
-      if (openAnimationClass) {
-        this.elements.content.classList.remove(openAnimationClass);
-      }
-      this.elements.content.classList.add(visible);
-    }
-  }
-  chatBoxEntranceAnimation() {
-    const {
-      entranceAnimation,
-      animated,
-      animatedWrapper,
-      none
-    } = this.getSettings('constants');
-    const entranceAnimationControl = this.getResponsiveSetting(entranceAnimation);
-    if (!entranceAnimationControl || none === entranceAnimationControl) {
-      return;
-    }
-    if (this.elements.content) {
-      this.elements.content.classList.add(animated);
-      this.elements.content.classList.add(entranceAnimationControl);
-    }
-    if (this.elements.contentWrapper) {
-      this.elements.contentWrapper.classList.remove(animatedWrapper);
-    }
-  }
-  chatBoxExitAnimation() {
-    const {
-      reverse,
-      exitAnimation,
-      animated,
-      animatedWrapper,
-      none
-    } = this.getSettings('constants');
-    const exitAnimationControl = this.getResponsiveSetting(exitAnimation);
-    if (!exitAnimationControl || none === exitAnimationControl) {
-      return;
-    }
-    if (this.elements.content) {
-      this.elements.content.classList.add(animated);
-      this.elements.content.classList.add(reverse);
-      this.elements.content.classList.add(exitAnimationControl);
-    }
-    if (this.elements.contentWrapper) {
-      this.elements.contentWrapper.classList.add(animatedWrapper);
-    }
-  }
-  openChatBox() {
-    const {
-      hasAnimations,
-      visible
-    } = this.getSettings('constants');
-    if (this.elements.main && this.elements.main.classList.contains(hasAnimations)) {
-      this.chatBoxEntranceAnimation();
-    } else if (this.elements.content) {
-      this.elements.content.classList.add(visible);
-    }
-    if (this.elements.contentWrapper) {
-      this.contentWrapperIsHidden(false);
-      if (!elementorFrontend.isEditMode()) {
-        this.elements.contentWrapper.setAttribute('tabindex', '0');
-        this.elements.contentWrapper.focus({
-          focusVisible: true
-        });
-      }
-    }
-    if (this.elements.chatButton) {
-      this.elements.chatButton.setAttribute('aria-expanded', 'true');
-    }
-    if (this.elements.closeButton) {
-      this.elements.closeButton.setAttribute('aria-expanded', 'true');
-    }
-  }
-  closeChatBox() {
-    const {
-      hasAnimations,
-      visible
-    } = this.getSettings('constants');
-    if (this.elements.main && this.elements.main.classList.contains(hasAnimations)) {
-      this.chatBoxExitAnimation();
-    } else if (this.elements.content) {
-      this.elements.content.classList.remove(visible);
-    }
-    if (this.elements.contentWrapper) {
-      this.contentWrapperIsHidden(true);
-    }
-    if (this.elements.chatButton) {
-      this.elements.chatButton.setAttribute('aria-expanded', 'false');
-      this.elements.chatButton.focus({
-        focusVisible: true
-      });
-    }
-    if (this.elements.closeButton) {
-      this.elements.closeButton.setAttribute('aria-expanded', 'false');
-    }
-  }
-  onChatButtonClick() {
-    if (this.elements.contentWrapper && this.contentWrapperIsHidden()) {
-      this.openChatBox();
-    } else {
-      this.closeChatBox();
-    }
-  }
-  initMessageBubbleTime() {
-    if (!this.elements.messageBubbleTime) {
-      return;
-    }
-    const messageBubbleTimeFormat = this.elements.messageBubbleTime.dataset.timeFormat;
-    const is12hFormat = '12h' === messageBubbleTimeFormat;
-    this.elements.messageBubbleTime.innerHTML = new Intl.DateTimeFormat('default', {
-      hour12: is12hFormat,
-      hour: 'numeric',
-      minute: 'numeric'
-    }).format(new Date());
-  }
-  removeChatButtonAnimationClasses() {
-    if (!this.elements.chatButton) {
-      return;
-    }
-    const {
-      chatButtonAnimation,
-      visible
-    } = this.getSettings('constants');
-    this.elements.chatButton.classList.remove(chatButtonAnimation);
-    this.elements.chatButton.classList.add(visible);
-  }
-  initChatButtonEntranceAnimation() {
-    const {
-      none,
-      chatButtonAnimation
-    } = this.getSettings('constants');
-    const entranceAnimationControl = this.getResponsiveSetting(chatButtonAnimation);
-    if (!entranceAnimationControl || none === entranceAnimationControl) {
-      return;
-    }
-    this.elements.chatButton.classList.add(entranceAnimationControl);
-  }
-  initDefaultState() {
-    // Manage accessibility
-    if (this.elements.contentWrapper) {
-      const isHidden = this.contentWrapperIsHidden();
-      if (this.elements.chatButton) {
-        this.elements.chatButton.setAttribute('aria-expanded', !isHidden);
-      }
-      if (this.elements.closeButton) {
-        this.elements.closeButton.setAttribute('aria-expanded', !isHidden);
-      }
-    }
-    if (elementorFrontend.isEditMode() && 'floating-buttons' === elementor?.config?.document?.type) {
-      this.openChatBox();
-    }
-  }
-  setupInnerContainer() {
-    this.elements.main.closest('.e-con-inner').classList.add('e-con-inner--floating-buttons');
-  }
-  onInit() {
-    const {
-      hasEntranceAnimation
-    } = this.getSettings('constants');
-    super.onInit(...arguments);
-    this.clickTrackingHandler = new _clickTracking.default({
-      $element: this.$element
-    });
-    if (this.elements.messageBubbleTime) {
-      this.initMessageBubbleTime();
-    }
-    this.initDefaultState();
-    if (this.elements.chatButton) {
-      if (this.elements.chatButton.classList.contains(hasEntranceAnimation)) {
-        this.initChatButtonEntranceAnimation();
-      }
-    }
-    this.setupInnerContainer();
-  }
-}
-exports["default"] = ContactButtonsHandler;
-
-/***/ }),
-
-/***/ "../modules/floating-buttons/assets/js/shared/frontend/handlers/click-tracking.js":
-/*!****************************************************************************************!*\
-  !*** ../modules/floating-buttons/assets/js/shared/frontend/handlers/click-tracking.js ***!
-  \****************************************************************************************/
-/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
-
-"use strict";
-
-
-var _interopRequireDefault = __webpack_require__(/*! @babel/runtime/helpers/interopRequireDefault */ "../node_modules/@babel/runtime/helpers/interopRequireDefault.js");
-Object.defineProperty(exports, "__esModule", ({
-  value: true
-}));
-exports["default"] = void 0;
-var _defineProperty2 = _interopRequireDefault(__webpack_require__(/*! @babel/runtime/helpers/defineProperty */ "../node_modules/@babel/runtime/helpers/defineProperty.js"));
-var _base = _interopRequireDefault(__webpack_require__(/*! elementor-frontend/handlers/base */ "../assets/dev/js/frontend/handlers/base.js"));
-class ClickTrackingHandler extends _base.default {
-  constructor() {
-    super(...arguments);
-    (0, _defineProperty2.default)(this, "clicks", []);
-  }
-  getDefaultSettings() {
-    return {
-      selectors: {
-        contentWrapper: '.e-contact-buttons__content-wrapper',
-        contactButtonCore: '.e-contact-buttons__send-button',
-        contentWrapperFloatingBars: '.e-floating-bars',
-        floatingBarCTAButton: '.e-floating-bars__cta-button',
-        elementorWrapper: '[data-elementor-type="floating-buttons"]'
-      }
-    };
-  }
-  getDefaultElements() {
-    const selectors = this.getSettings('selectors');
-    return {
-      contentWrapper: this.$element[0].querySelector(selectors.contentWrapper),
-      contentWrapperFloatingBars: this.$element[0].querySelector(selectors.contentWrapperFloatingBars)
-    };
-  }
-  bindEvents() {
-    if (this.elements.contentWrapper) {
-      this.elements.contentWrapper.addEventListener('click', this.onChatButtonTrackClick.bind(this));
-    }
-    if (this.elements.contentWrapperFloatingBars) {
-      this.elements.contentWrapperFloatingBars.addEventListener('click', this.onChatButtonTrackClick.bind(this));
-    }
-    window.addEventListener('beforeunload', () => {
-      if (this.clicks.length > 0) {
-        this.sendClicks();
-      }
-    });
-  }
-  onChatButtonTrackClick(event) {
-    const targetElement = event.target || event.srcElement;
-    const selectors = this.getSettings('selectors');
-    if (targetElement.matches(selectors.contactButtonCore) || targetElement.closest(selectors.contactButtonCore) || targetElement.matches(selectors.floatingBarCTAButton) || targetElement.closest(selectors.floatingBarCTAButton)) {
-      this.getDocumentIdAndTrack(targetElement, selectors);
-    }
-  }
-  getDocumentIdAndTrack(targetElement, selectors) {
-    const documentId = targetElement.closest(selectors.elementorWrapper).dataset.elementorId;
-    this.trackClick(documentId);
-  }
-  trackClick(documentId) {
-    if (!documentId) {
-      return;
-    }
-    this.clicks.push(documentId);
-    if (this.clicks.length >= 10) {
-      this.sendClicks();
-    }
-  }
-  sendClicks() {
-    const formData = new FormData();
-    formData.append('action', 'elementor_send_clicks');
-    formData.append('_nonce', elementorFrontendConfig?.nonces?.floatingButtonsClickTracking);
-    this.clicks.forEach(documentId => formData.append('clicks[]', documentId));
-    fetch(elementorFrontendConfig?.urls?.ajaxurl, {
-      method: 'POST',
-      body: formData
-    }).then(() => {
-      this.clicks = [];
-    });
-  }
-}
-exports["default"] = ClickTrackingHandler;
-
-/***/ }),
-
-/***/ "../modules/nested-accordion/assets/js/frontend/handlers/nested-accordion-title-keyboard-handler.js":
-/*!**********************************************************************************************************!*\
-  !*** ../modules/nested-accordion/assets/js/frontend/handlers/nested-accordion-title-keyboard-handler.js ***!
-  \**********************************************************************************************************/
-/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
-
-"use strict";
-
-
-var _interopRequireDefault = __webpack_require__(/*! @babel/runtime/helpers/interopRequireDefault */ "../node_modules/@babel/runtime/helpers/interopRequireDefault.js");
-Object.defineProperty(exports, "__esModule", ({
-  value: true
-}));
-exports["default"] = void 0;
-var _nestedTitleKeyboardHandler = _interopRequireDefault(__webpack_require__(/*! elementor-assets-js/frontend/handlers/accessibility/nested-title-keyboard-handler */ "../assets/dev/js/frontend/handlers/accessibility/nested-title-keyboard-handler.js"));
-class NestedAccordionTitleKeyboardHandler extends _nestedTitleKeyboardHandler.default {
-  __construct() {
-    super.__construct(...arguments);
-    const config = arguments.length <= 0 ? undefined : arguments[0];
-    this.toggleTitle = config.toggleTitle;
-  }
-  getDefaultSettings() {
-    const parentSettings = super.getDefaultSettings();
-    return {
-      ...parentSettings,
-      selectors: {
-        itemTitle: '.e-n-accordion-item-title',
-        itemContainer: '.e-n-accordion-item > .e-con'
-      },
-      ariaAttributes: {
-        titleStateAttribute: 'aria-expanded',
-        activeTitleSelector: '[aria-expanded="true"]'
-      },
-      datasets: {
-        titleIndex: 'data-accordion-index'
-      }
-    };
-  }
-  handeTitleLinkEnterOrSpaceEvent(event) {
-    this.toggleTitle(event);
-  }
-  handleContentElementEscapeEvents(event) {
-    this.getActiveTitleElement().trigger('focus');
-    this.toggleTitle(event);
-  }
-  handleTitleEscapeKeyEvents(event) {
-    const detailsNode = event?.currentTarget?.parentElement,
-      isOpen = detailsNode?.open;
-    if (isOpen) {
-      this.toggleTitle(event);
-    }
-  }
-}
-exports["default"] = NestedAccordionTitleKeyboardHandler;
-
-/***/ }),
-
-/***/ "../modules/nested-accordion/assets/js/frontend/handlers/nested-accordion.js":
-/*!***********************************************************************************!*\
-  !*** ../modules/nested-accordion/assets/js/frontend/handlers/nested-accordion.js ***!
-  \***********************************************************************************/
-/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
-
-"use strict";
-
-
-var _interopRequireDefault = __webpack_require__(/*! @babel/runtime/helpers/interopRequireDefault */ "../node_modules/@babel/runtime/helpers/interopRequireDefault.js");
-Object.defineProperty(exports, "__esModule", ({
-  value: true
-}));
-exports["default"] = void 0;
-var _base = _interopRequireDefault(__webpack_require__(/*! elementor-frontend/handlers/base */ "../assets/dev/js/frontend/handlers/base.js"));
-var _nestedAccordionTitleKeyboardHandler = _interopRequireDefault(__webpack_require__(/*! ./nested-accordion-title-keyboard-handler */ "../modules/nested-accordion/assets/js/frontend/handlers/nested-accordion-title-keyboard-handler.js"));
-class NestedAccordion extends _base.default {
-  constructor() {
-    super(...arguments);
-    this.animations = new Map();
-  }
-  getDefaultSettings() {
-    return {
-      selectors: {
-        accordion: '.e-n-accordion',
-        accordionContentContainers: '.e-n-accordion > .e-con',
-        accordionItems: '.e-n-accordion-item',
-        accordionItemTitles: '.e-n-accordion-item-title',
-        accordionItemTitlesText: '.e-n-accordion-item-title-text',
-        accordionContent: '.e-n-accordion-item > .e-con',
-        directAccordionItems: ':scope > .e-n-accordion-item',
-        directAccordionItemTitles: ':scope > .e-n-accordion-item > .e-n-accordion-item-title'
-      },
-      default_state: 'expanded',
-      attributes: {
-        index: 'data-accordion-index',
-        ariaLabelledBy: 'aria-labelledby'
-      }
-    };
-  }
-  getDefaultElements() {
-    const selectors = this.getSettings('selectors');
-    return {
-      $accordion: this.findElement(selectors.accordion),
-      $contentContainers: this.findElement(selectors.accordionContentContainers),
-      $accordionItems: this.findElement(selectors.accordionItems),
-      $accordionTitles: this.findElement(selectors.accordionItemTitles),
-      $accordionContent: this.findElement(selectors.accordionContent)
-    };
-  }
-  onInit() {
-    super.onInit(...arguments);
-    if (elementorFrontend.isEditMode() && !elementorCommon.config.experimentalFeatures.e_nested_atomic_repeaters) {
-      this.interlaceContainers();
-    }
-    this.injectKeyboardHandler();
-  }
-  injectKeyboardHandler() {
-    if ('nested-accordion.default' === this.getSettings('elementName')) {
-      new _nestedAccordionTitleKeyboardHandler.default({
-        $element: this.$element,
-        toggleTitle: this.clickListener.bind(this)
-      });
-    }
-  }
-  interlaceContainers() {
-    const {
-      $contentContainers,
-      $accordionItems
-    } = this.getDefaultElements();
-    $contentContainers.each((index, element) => {
-      $accordionItems[index].appendChild(element);
-    });
-  }
-  linkContainer(event) {
-    const {
-        container,
-        index,
-        targetContainer,
-        action: {
-          type
-        }
-      } = event.detail,
-      view = container.view.$el,
-      id = container.model.get('id'),
-      currentId = this.$element.data('id');
-    if (id === currentId) {
-      const {
-        $accordionItems
-      } = this.getDefaultElements();
-      let accordionItem, contentContainer;
-      switch (type) {
-        case 'move':
-          [accordionItem, contentContainer] = this.move(view, index, targetContainer, $accordionItems);
-          break;
-        case 'duplicate':
-          [accordionItem, contentContainer] = this.duplicate(view, index, targetContainer, $accordionItems);
-          break;
-        default:
-          break;
-      }
-      if (undefined !== accordionItem) {
-        accordionItem.appendChild(contentContainer);
-      }
-      this.updateIndexValues();
-      this.updateListeners(view);
-      elementor.$preview[0].contentWindow.dispatchEvent(new CustomEvent('elementor/elements/link-data-bindings'));
-    }
-  }
-  move(view, index, targetContainer, accordionItems) {
-    return [accordionItems[index], targetContainer.view.$el[0]];
-  }
-  duplicate(view, index, targetContainer, accordionItems) {
-    return [accordionItems[index + 1], targetContainer.view.$el[0]];
-  }
-  updateIndexValues() {
-    const {
-        $accordionContent,
-        $accordionItems
-      } = this.getDefaultElements(),
-      settings = this.getSettings(),
-      itemIdBase = $accordionItems[0].getAttribute('id').slice(0, -1);
-    $accordionItems.each((index, element) => {
-      element.setAttribute('id', `${itemIdBase}${index}`);
-      element.querySelector(settings.selectors.accordionItemTitles).setAttribute(settings.attributes.index, index + 1);
-      element.querySelector(settings.selectors.accordionItemTitles).setAttribute('aria-controls', `${itemIdBase}${index}`);
-      element.querySelector(settings.selectors.accordionItemTitlesText).setAttribute('data-binding-index', index + 1);
-      $accordionContent[index].setAttribute(settings.attributes.ariaLabelledBy, `${itemIdBase}${index}`);
-    });
-  }
-  updateListeners(view) {
-    this.elements.$accordionTitles = view.find(this.getSettings('selectors.accordionItemTitles'));
-    this.elements.$accordionItems = view.find(this.getSettings('selectors.accordionItems'));
-    this.elements.$accordionTitles.on('click', this.clickListener.bind(this));
-  }
-  bindEvents() {
-    this.elements.$accordionTitles.on('click', this.clickListener.bind(this));
-    elementorFrontend.elements.$window.on('elementor/nested-container/atomic-repeater', this.linkContainer.bind(this));
-  }
-  unbindEvents() {
-    this.elements.$accordionTitles.off();
-  }
-  clickListener(event) {
-    event.preventDefault();
-    this.elements = this.getDefaultElements();
-    const settings = this.getSettings(),
-      accordionItem = event?.currentTarget?.closest(settings.selectors.accordionItems),
-      accordion = event?.currentTarget?.closest(settings.selectors.accordion),
-      itemSummary = accordionItem.querySelector(settings.selectors.accordionItemTitles),
-      accordionContent = accordionItem.querySelector(settings.selectors.accordionContent),
-      {
-        max_items_expended: maxItemsExpended
-      } = this.getElementSettings(),
-      directAccordionItems = accordion.querySelectorAll(settings.selectors.directAccordionItems),
-      directAccordionItemTitles = accordion.querySelectorAll(settings.selectors.directAccordionItemTitles);
-    if ('one' === maxItemsExpended) {
-      this.closeAllItems(directAccordionItems, directAccordionItemTitles);
-    }
-    if (!accordionItem.open) {
-      this.prepareOpenAnimation(accordionItem, itemSummary, accordionContent);
-    } else {
-      this.closeAccordionItem(accordionItem, itemSummary);
-    }
-  }
-  animateItem(accordionItem, startHeight, endHeight, isOpen) {
-    accordionItem.style.overflow = 'hidden';
-    let animation = this.animations.get(accordionItem);
-    if (animation) {
-      animation.cancel();
-    }
-    animation = accordionItem.animate({
-      height: [startHeight, endHeight]
-    }, {
-      duration: this.getAnimationDuration()
-    });
-    animation.onfinish = () => this.onAnimationFinish(accordionItem, isOpen);
-    this.animations.set(accordionItem, animation);
-    accordionItem.querySelector('summary')?.setAttribute('aria-expanded', isOpen);
-  }
-  closeAccordionItem(accordionItem, accordionItemTitle) {
-    const startHeight = `${accordionItem.offsetHeight}px`,
-      endHeight = `${accordionItemTitle.offsetHeight}px`;
-    this.animateItem(accordionItem, startHeight, endHeight, false);
-  }
-  prepareOpenAnimation(accordionItem, accordionItemTitle, accordionItemContent) {
-    accordionItem.style.overflow = 'hidden';
-    accordionItem.style.height = `${accordionItem.offsetHeight}px`;
-    accordionItem.open = true;
-    window.requestAnimationFrame(() => this.openAccordionItem(accordionItem, accordionItemTitle, accordionItemContent));
-  }
-  openAccordionItem(accordionItem, accordionItemTitle, accordionItemContent) {
-    const startHeight = `${accordionItem.offsetHeight}px`,
-      endHeight = `${accordionItemTitle.offsetHeight + accordionItemContent.offsetHeight}px`;
-    this.animateItem(accordionItem, startHeight, endHeight, true);
-  }
-  onAnimationFinish(accordionItem, isOpen) {
-    accordionItem.open = isOpen;
-    this.animations.set(accordionItem, null);
-    accordionItem.style.height = accordionItem.style.overflow = '';
-  }
-  closeAllItems(items, titles) {
-    titles.forEach((title, index) => {
-      this.closeAccordionItem(items[index], title);
-    });
-  }
-  getAnimationDuration() {
-    const {
-      size,
-      unit
-    } = this.getElementSettings('n_accordion_animation_duration');
-    return size * ('ms' === unit ? 1 : 1000);
-  }
-}
-exports["default"] = NestedAccordion;
 
 /***/ }),
 
@@ -3046,7 +1872,7 @@ class NestedTabs extends _base.default {
    * @param {Object} content - Active nested tab dom element.
    */
   reInitSwipers(event, content) {
-    const swiperElements = content.querySelectorAll(`.${elementorFrontend.config.swiperClass}`);
+    const swiperElements = content.querySelectorAll('.swiper');
     for (const element of swiperElements) {
       if (!element.swiper) {
         return;
@@ -3063,7 +1889,15 @@ class NestedTabs extends _base.default {
     (0, _flexHorizontalScroll.setHorizontalScrollAlignment)(this.getHorizontalScrollingSettings());
     this.setTouchMode();
     if ('nested-tabs.default' === this.getSettings('elementName')) {
-      new elementorModules.frontend.handlers.NestedTitleKeyboardHandler(this.getKeyboardNavigationSettings());
+      __webpack_require__.e(/*! import() | nested-title-keyboard-handler */ "nested-title-keyboard-handler").then(__webpack_require__.bind(__webpack_require__, /*! elementor-frontend/handlers/accessibility/nested-title-keyboard-handler */ "../assets/dev/js/frontend/handlers/accessibility/nested-title-keyboard-handler.js")).then(_ref => {
+        let {
+          default: NestedTitleKeyboardHandler
+        } = _ref;
+        new NestedTitleKeyboardHandler(this.getKeyboardNavigationSettings());
+      }).catch(error => {
+        // eslint-disable-next-line no-console
+        console.error('Error importing module:', error);
+      });
     }
   }
   onEditSettingsChange(propertyName, value) {
@@ -3249,22 +2083,33 @@ module.exports = function (argument) {
 
 /***/ }),
 
-/***/ "../node_modules/core-js/internals/a-possible-prototype.js":
-/*!*****************************************************************!*\
-  !*** ../node_modules/core-js/internals/a-possible-prototype.js ***!
-  \*****************************************************************/
+/***/ "../node_modules/core-js/internals/add-to-unscopables.js":
+/*!***************************************************************!*\
+  !*** ../node_modules/core-js/internals/add-to-unscopables.js ***!
+  \***************************************************************/
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 "use strict";
 
-var isCallable = __webpack_require__(/*! ../internals/is-callable */ "../node_modules/core-js/internals/is-callable.js");
+var wellKnownSymbol = __webpack_require__(/*! ../internals/well-known-symbol */ "../node_modules/core-js/internals/well-known-symbol.js");
+var create = __webpack_require__(/*! ../internals/object-create */ "../node_modules/core-js/internals/object-create.js");
+var defineProperty = (__webpack_require__(/*! ../internals/object-define-property */ "../node_modules/core-js/internals/object-define-property.js").f);
 
-var $String = String;
-var $TypeError = TypeError;
+var UNSCOPABLES = wellKnownSymbol('unscopables');
+var ArrayPrototype = Array.prototype;
 
-module.exports = function (argument) {
-  if (typeof argument == 'object' || isCallable(argument)) return argument;
-  throw $TypeError("Can't set " + $String(argument) + ' as a prototype');
+// Array.prototype[@@unscopables]
+// https://tc39.es/ecma262/#sec-array.prototype-@@unscopables
+if (ArrayPrototype[UNSCOPABLES] == undefined) {
+  defineProperty(ArrayPrototype, UNSCOPABLES, {
+    configurable: true,
+    value: create(null)
+  });
+}
+
+// add a key to Array.prototype[@@unscopables]
+module.exports = function (key) {
+  ArrayPrototype[UNSCOPABLES][key] = true;
 };
 
 
@@ -3336,6 +2181,44 @@ module.exports = {
 
 /***/ }),
 
+/***/ "../node_modules/core-js/internals/array-set-length.js":
+/*!*************************************************************!*\
+  !*** ../node_modules/core-js/internals/array-set-length.js ***!
+  \*************************************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+"use strict";
+
+var DESCRIPTORS = __webpack_require__(/*! ../internals/descriptors */ "../node_modules/core-js/internals/descriptors.js");
+var isArray = __webpack_require__(/*! ../internals/is-array */ "../node_modules/core-js/internals/is-array.js");
+
+var $TypeError = TypeError;
+// eslint-disable-next-line es/no-object-getownpropertydescriptor -- safe
+var getOwnPropertyDescriptor = Object.getOwnPropertyDescriptor;
+
+// Safari < 13 does not throw an error in this case
+var SILENT_ON_NON_WRITABLE_LENGTH_SET = DESCRIPTORS && !function () {
+  // makes no sense without proper strict mode support
+  if (this !== undefined) return true;
+  try {
+    // eslint-disable-next-line es/no-object-defineproperty -- safe
+    Object.defineProperty([], 'length', { writable: false }).length = 1;
+  } catch (error) {
+    return error instanceof TypeError;
+  }
+}();
+
+module.exports = SILENT_ON_NON_WRITABLE_LENGTH_SET ? function (O, length) {
+  if (isArray(O) && !getOwnPropertyDescriptor(O, 'length').writable) {
+    throw $TypeError('Cannot set read only .length');
+  } return O.length = length;
+} : function (O, length) {
+  return O.length = length;
+};
+
+
+/***/ }),
+
 /***/ "../node_modules/core-js/internals/classof-raw.js":
 /*!********************************************************!*\
   !*** ../node_modules/core-js/internals/classof-raw.js ***!
@@ -3351,47 +2234,6 @@ var stringSlice = uncurryThis(''.slice);
 
 module.exports = function (it) {
   return stringSlice(toString(it), 8, -1);
-};
-
-
-/***/ }),
-
-/***/ "../node_modules/core-js/internals/classof.js":
-/*!****************************************************!*\
-  !*** ../node_modules/core-js/internals/classof.js ***!
-  \****************************************************/
-/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
-
-"use strict";
-
-var TO_STRING_TAG_SUPPORT = __webpack_require__(/*! ../internals/to-string-tag-support */ "../node_modules/core-js/internals/to-string-tag-support.js");
-var isCallable = __webpack_require__(/*! ../internals/is-callable */ "../node_modules/core-js/internals/is-callable.js");
-var classofRaw = __webpack_require__(/*! ../internals/classof-raw */ "../node_modules/core-js/internals/classof-raw.js");
-var wellKnownSymbol = __webpack_require__(/*! ../internals/well-known-symbol */ "../node_modules/core-js/internals/well-known-symbol.js");
-
-var TO_STRING_TAG = wellKnownSymbol('toStringTag');
-var $Object = Object;
-
-// ES3 wrong here
-var CORRECT_ARGUMENTS = classofRaw(function () { return arguments; }()) == 'Arguments';
-
-// fallback for IE11 Script Access Denied error
-var tryGet = function (it, key) {
-  try {
-    return it[key];
-  } catch (error) { /* empty */ }
-};
-
-// getting tag from ES6+ `Object.prototype.toString`
-module.exports = TO_STRING_TAG_SUPPORT ? classofRaw : function (it) {
-  var O, tag, result;
-  return it === undefined ? 'Undefined' : it === null ? 'Null'
-    // @@toStringTag case
-    : typeof (tag = tryGet(O = $Object(it), TO_STRING_TAG)) == 'string' ? tag
-    // builtinTag case
-    : CORRECT_ARGUMENTS ? classofRaw(O)
-    // ES3 arguments fallback
-    : (result = classofRaw(O)) == 'Object' && isCallable(O.callee) ? 'Arguments' : result;
 };
 
 
@@ -3593,6 +2435,25 @@ module.exports = function (it) {
 
 /***/ }),
 
+/***/ "../node_modules/core-js/internals/does-not-exceed-safe-integer.js":
+/*!*************************************************************************!*\
+  !*** ../node_modules/core-js/internals/does-not-exceed-safe-integer.js ***!
+  \*************************************************************************/
+/***/ ((module) => {
+
+"use strict";
+
+var $TypeError = TypeError;
+var MAX_SAFE_INTEGER = 0x1FFFFFFFFFFFFF; // 2 ** 53 - 1 == 9007199254740991
+
+module.exports = function (it) {
+  if (it > MAX_SAFE_INTEGER) throw $TypeError('Maximum allowed index exceeded');
+  return it;
+};
+
+
+/***/ }),
+
 /***/ "../node_modules/core-js/internals/engine-user-agent.js":
 /*!**************************************************************!*\
   !*** ../node_modules/core-js/internals/engine-user-agent.js ***!
@@ -3663,80 +2524,6 @@ module.exports = [
   'toString',
   'valueOf'
 ];
-
-
-/***/ }),
-
-/***/ "../node_modules/core-js/internals/error-stack-clear.js":
-/*!**************************************************************!*\
-  !*** ../node_modules/core-js/internals/error-stack-clear.js ***!
-  \**************************************************************/
-/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
-
-"use strict";
-
-var uncurryThis = __webpack_require__(/*! ../internals/function-uncurry-this */ "../node_modules/core-js/internals/function-uncurry-this.js");
-
-var $Error = Error;
-var replace = uncurryThis(''.replace);
-
-var TEST = (function (arg) { return String($Error(arg).stack); })('zxcasd');
-// eslint-disable-next-line redos/no-vulnerable -- safe
-var V8_OR_CHAKRA_STACK_ENTRY = /\n\s*at [^:]*:[^\n]*/;
-var IS_V8_OR_CHAKRA_STACK = V8_OR_CHAKRA_STACK_ENTRY.test(TEST);
-
-module.exports = function (stack, dropEntries) {
-  if (IS_V8_OR_CHAKRA_STACK && typeof stack == 'string' && !$Error.prepareStackTrace) {
-    while (dropEntries--) stack = replace(stack, V8_OR_CHAKRA_STACK_ENTRY, '');
-  } return stack;
-};
-
-
-/***/ }),
-
-/***/ "../node_modules/core-js/internals/error-stack-install.js":
-/*!****************************************************************!*\
-  !*** ../node_modules/core-js/internals/error-stack-install.js ***!
-  \****************************************************************/
-/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
-
-"use strict";
-
-var createNonEnumerableProperty = __webpack_require__(/*! ../internals/create-non-enumerable-property */ "../node_modules/core-js/internals/create-non-enumerable-property.js");
-var clearErrorStack = __webpack_require__(/*! ../internals/error-stack-clear */ "../node_modules/core-js/internals/error-stack-clear.js");
-var ERROR_STACK_INSTALLABLE = __webpack_require__(/*! ../internals/error-stack-installable */ "../node_modules/core-js/internals/error-stack-installable.js");
-
-// non-standard V8
-var captureStackTrace = Error.captureStackTrace;
-
-module.exports = function (error, C, stack, dropEntries) {
-  if (ERROR_STACK_INSTALLABLE) {
-    if (captureStackTrace) captureStackTrace(error, C);
-    else createNonEnumerableProperty(error, 'stack', clearErrorStack(stack, dropEntries));
-  }
-};
-
-
-/***/ }),
-
-/***/ "../node_modules/core-js/internals/error-stack-installable.js":
-/*!********************************************************************!*\
-  !*** ../node_modules/core-js/internals/error-stack-installable.js ***!
-  \********************************************************************/
-/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
-
-"use strict";
-
-var fails = __webpack_require__(/*! ../internals/fails */ "../node_modules/core-js/internals/fails.js");
-var createPropertyDescriptor = __webpack_require__(/*! ../internals/create-property-descriptor */ "../node_modules/core-js/internals/create-property-descriptor.js");
-
-module.exports = !fails(function () {
-  var error = Error('a');
-  if (!('stack' in error)) return true;
-  // eslint-disable-next-line es/no-object-defineproperty -- safe
-  Object.defineProperty(error, 'stack', createPropertyDescriptor(1, 7));
-  return error.stack !== 7;
-});
 
 
 /***/ }),
@@ -3826,28 +2613,6 @@ module.exports = function (exec) {
 
 /***/ }),
 
-/***/ "../node_modules/core-js/internals/function-apply.js":
-/*!***********************************************************!*\
-  !*** ../node_modules/core-js/internals/function-apply.js ***!
-  \***********************************************************/
-/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
-
-"use strict";
-
-var NATIVE_BIND = __webpack_require__(/*! ../internals/function-bind-native */ "../node_modules/core-js/internals/function-bind-native.js");
-
-var FunctionPrototype = Function.prototype;
-var apply = FunctionPrototype.apply;
-var call = FunctionPrototype.call;
-
-// eslint-disable-next-line es/no-reflect -- safe
-module.exports = typeof Reflect == 'object' && Reflect.apply || (NATIVE_BIND ? call.bind(apply) : function () {
-  return call.apply(apply, arguments);
-});
-
-
-/***/ }),
-
 /***/ "../node_modules/core-js/internals/function-bind-native.js":
 /*!*****************************************************************!*\
   !*** ../node_modules/core-js/internals/function-bind-native.js ***!
@@ -3911,27 +2676,6 @@ module.exports = {
   EXISTS: EXISTS,
   PROPER: PROPER,
   CONFIGURABLE: CONFIGURABLE
-};
-
-
-/***/ }),
-
-/***/ "../node_modules/core-js/internals/function-uncurry-this-accessor.js":
-/*!***************************************************************************!*\
-  !*** ../node_modules/core-js/internals/function-uncurry-this-accessor.js ***!
-  \***************************************************************************/
-/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
-
-"use strict";
-
-var uncurryThis = __webpack_require__(/*! ../internals/function-uncurry-this */ "../node_modules/core-js/internals/function-uncurry-this.js");
-var aCallable = __webpack_require__(/*! ../internals/a-callable */ "../node_modules/core-js/internals/a-callable.js");
-
-module.exports = function (object, key, method) {
-  try {
-    // eslint-disable-next-line es/no-object-getownpropertydescriptor -- safe
-    return uncurryThis(aCallable(Object.getOwnPropertyDescriptor(object, key)[method]));
-  } catch (error) { /* empty */ }
 };
 
 
@@ -4065,6 +2809,21 @@ module.exports = {};
 
 /***/ }),
 
+/***/ "../node_modules/core-js/internals/html.js":
+/*!*************************************************!*\
+  !*** ../node_modules/core-js/internals/html.js ***!
+  \*************************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+"use strict";
+
+var getBuiltIn = __webpack_require__(/*! ../internals/get-built-in */ "../node_modules/core-js/internals/get-built-in.js");
+
+module.exports = getBuiltIn('document', 'documentElement');
+
+
+/***/ }),
+
 /***/ "../node_modules/core-js/internals/ie8-dom-define.js":
 /*!***********************************************************!*\
   !*** ../node_modules/core-js/internals/ie8-dom-define.js ***!
@@ -4115,36 +2874,6 @@ module.exports = fails(function () {
 
 /***/ }),
 
-/***/ "../node_modules/core-js/internals/inherit-if-required.js":
-/*!****************************************************************!*\
-  !*** ../node_modules/core-js/internals/inherit-if-required.js ***!
-  \****************************************************************/
-/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
-
-"use strict";
-
-var isCallable = __webpack_require__(/*! ../internals/is-callable */ "../node_modules/core-js/internals/is-callable.js");
-var isObject = __webpack_require__(/*! ../internals/is-object */ "../node_modules/core-js/internals/is-object.js");
-var setPrototypeOf = __webpack_require__(/*! ../internals/object-set-prototype-of */ "../node_modules/core-js/internals/object-set-prototype-of.js");
-
-// makes subclassing work correct for wrapped built-ins
-module.exports = function ($this, dummy, Wrapper) {
-  var NewTarget, NewTargetPrototype;
-  if (
-    // it can work only with native `setPrototypeOf`
-    setPrototypeOf &&
-    // we haven't completely correct pre-ES6 way for getting `new.target`, so use this
-    isCallable(NewTarget = dummy.constructor) &&
-    NewTarget !== Wrapper &&
-    isObject(NewTargetPrototype = NewTarget.prototype) &&
-    NewTargetPrototype !== Wrapper.prototype
-  ) setPrototypeOf($this, NewTargetPrototype);
-  return $this;
-};
-
-
-/***/ }),
-
 /***/ "../node_modules/core-js/internals/inspect-source.js":
 /*!***********************************************************!*\
   !*** ../node_modules/core-js/internals/inspect-source.js ***!
@@ -4167,28 +2896,6 @@ if (!isCallable(store.inspectSource)) {
 }
 
 module.exports = store.inspectSource;
-
-
-/***/ }),
-
-/***/ "../node_modules/core-js/internals/install-error-cause.js":
-/*!****************************************************************!*\
-  !*** ../node_modules/core-js/internals/install-error-cause.js ***!
-  \****************************************************************/
-/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
-
-"use strict";
-
-var isObject = __webpack_require__(/*! ../internals/is-object */ "../node_modules/core-js/internals/is-object.js");
-var createNonEnumerableProperty = __webpack_require__(/*! ../internals/create-non-enumerable-property */ "../node_modules/core-js/internals/create-non-enumerable-property.js");
-
-// `InstallErrorCause` abstract operation
-// https://tc39.es/proposal-error-cause/#sec-errorobjects-install-error-cause
-module.exports = function (O, options) {
-  if (isObject(options) && 'cause' in options) {
-    createNonEnumerableProperty(O, 'cause', options.cause);
-  }
-};
 
 
 /***/ }),
@@ -4270,6 +2977,26 @@ module.exports = {
   has: has,
   enforce: enforce,
   getterFor: getterFor
+};
+
+
+/***/ }),
+
+/***/ "../node_modules/core-js/internals/is-array.js":
+/*!*****************************************************!*\
+  !*** ../node_modules/core-js/internals/is-array.js ***!
+  \*****************************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+"use strict";
+
+var classof = __webpack_require__(/*! ../internals/classof-raw */ "../node_modules/core-js/internals/classof-raw.js");
+
+// `IsArray` abstract operation
+// https://tc39.es/ecma262/#sec-isarray
+// eslint-disable-next-line es/no-array-isarray -- safe
+module.exports = Array.isArray || function isArray(argument) {
+  return classof(argument) == 'Array';
 };
 
 
@@ -4516,18 +3243,128 @@ module.exports = Math.trunc || function trunc(x) {
 
 /***/ }),
 
-/***/ "../node_modules/core-js/internals/normalize-string-argument.js":
-/*!**********************************************************************!*\
-  !*** ../node_modules/core-js/internals/normalize-string-argument.js ***!
-  \**********************************************************************/
+/***/ "../node_modules/core-js/internals/object-create.js":
+/*!**********************************************************!*\
+  !*** ../node_modules/core-js/internals/object-create.js ***!
+  \**********************************************************/
 /***/ ((module, __unused_webpack_exports, __webpack_require__) => {
 
 "use strict";
 
-var toString = __webpack_require__(/*! ../internals/to-string */ "../node_modules/core-js/internals/to-string.js");
+/* global ActiveXObject -- old IE, WSH */
+var anObject = __webpack_require__(/*! ../internals/an-object */ "../node_modules/core-js/internals/an-object.js");
+var definePropertiesModule = __webpack_require__(/*! ../internals/object-define-properties */ "../node_modules/core-js/internals/object-define-properties.js");
+var enumBugKeys = __webpack_require__(/*! ../internals/enum-bug-keys */ "../node_modules/core-js/internals/enum-bug-keys.js");
+var hiddenKeys = __webpack_require__(/*! ../internals/hidden-keys */ "../node_modules/core-js/internals/hidden-keys.js");
+var html = __webpack_require__(/*! ../internals/html */ "../node_modules/core-js/internals/html.js");
+var documentCreateElement = __webpack_require__(/*! ../internals/document-create-element */ "../node_modules/core-js/internals/document-create-element.js");
+var sharedKey = __webpack_require__(/*! ../internals/shared-key */ "../node_modules/core-js/internals/shared-key.js");
 
-module.exports = function (argument, $default) {
-  return argument === undefined ? arguments.length < 2 ? '' : $default : toString(argument);
+var GT = '>';
+var LT = '<';
+var PROTOTYPE = 'prototype';
+var SCRIPT = 'script';
+var IE_PROTO = sharedKey('IE_PROTO');
+
+var EmptyConstructor = function () { /* empty */ };
+
+var scriptTag = function (content) {
+  return LT + SCRIPT + GT + content + LT + '/' + SCRIPT + GT;
+};
+
+// Create object with fake `null` prototype: use ActiveX Object with cleared prototype
+var NullProtoObjectViaActiveX = function (activeXDocument) {
+  activeXDocument.write(scriptTag(''));
+  activeXDocument.close();
+  var temp = activeXDocument.parentWindow.Object;
+  activeXDocument = null; // avoid memory leak
+  return temp;
+};
+
+// Create object with fake `null` prototype: use iframe Object with cleared prototype
+var NullProtoObjectViaIFrame = function () {
+  // Thrash, waste and sodomy: IE GC bug
+  var iframe = documentCreateElement('iframe');
+  var JS = 'java' + SCRIPT + ':';
+  var iframeDocument;
+  iframe.style.display = 'none';
+  html.appendChild(iframe);
+  // https://github.com/zloirock/core-js/issues/475
+  iframe.src = String(JS);
+  iframeDocument = iframe.contentWindow.document;
+  iframeDocument.open();
+  iframeDocument.write(scriptTag('document.F=Object'));
+  iframeDocument.close();
+  return iframeDocument.F;
+};
+
+// Check for document.domain and active x support
+// No need to use active x approach when document.domain is not set
+// see https://github.com/es-shims/es5-shim/issues/150
+// variation of https://github.com/kitcambridge/es5-shim/commit/4f738ac066346
+// avoid IE GC bug
+var activeXDocument;
+var NullProtoObject = function () {
+  try {
+    activeXDocument = new ActiveXObject('htmlfile');
+  } catch (error) { /* ignore */ }
+  NullProtoObject = typeof document != 'undefined'
+    ? document.domain && activeXDocument
+      ? NullProtoObjectViaActiveX(activeXDocument) // old IE
+      : NullProtoObjectViaIFrame()
+    : NullProtoObjectViaActiveX(activeXDocument); // WSH
+  var length = enumBugKeys.length;
+  while (length--) delete NullProtoObject[PROTOTYPE][enumBugKeys[length]];
+  return NullProtoObject();
+};
+
+hiddenKeys[IE_PROTO] = true;
+
+// `Object.create` method
+// https://tc39.es/ecma262/#sec-object.create
+// eslint-disable-next-line es/no-object-create -- safe
+module.exports = Object.create || function create(O, Properties) {
+  var result;
+  if (O !== null) {
+    EmptyConstructor[PROTOTYPE] = anObject(O);
+    result = new EmptyConstructor();
+    EmptyConstructor[PROTOTYPE] = null;
+    // add "__proto__" for Object.getPrototypeOf polyfill
+    result[IE_PROTO] = O;
+  } else result = NullProtoObject();
+  return Properties === undefined ? result : definePropertiesModule.f(result, Properties);
+};
+
+
+/***/ }),
+
+/***/ "../node_modules/core-js/internals/object-define-properties.js":
+/*!*********************************************************************!*\
+  !*** ../node_modules/core-js/internals/object-define-properties.js ***!
+  \*********************************************************************/
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+"use strict";
+
+var DESCRIPTORS = __webpack_require__(/*! ../internals/descriptors */ "../node_modules/core-js/internals/descriptors.js");
+var V8_PROTOTYPE_DEFINE_BUG = __webpack_require__(/*! ../internals/v8-prototype-define-bug */ "../node_modules/core-js/internals/v8-prototype-define-bug.js");
+var definePropertyModule = __webpack_require__(/*! ../internals/object-define-property */ "../node_modules/core-js/internals/object-define-property.js");
+var anObject = __webpack_require__(/*! ../internals/an-object */ "../node_modules/core-js/internals/an-object.js");
+var toIndexedObject = __webpack_require__(/*! ../internals/to-indexed-object */ "../node_modules/core-js/internals/to-indexed-object.js");
+var objectKeys = __webpack_require__(/*! ../internals/object-keys */ "../node_modules/core-js/internals/object-keys.js");
+
+// `Object.defineProperties` method
+// https://tc39.es/ecma262/#sec-object.defineproperties
+// eslint-disable-next-line es/no-object-defineproperties -- safe
+exports.f = DESCRIPTORS && !V8_PROTOTYPE_DEFINE_BUG ? Object.defineProperties : function defineProperties(O, Properties) {
+  anObject(O);
+  var props = toIndexedObject(Properties);
+  var keys = objectKeys(Properties);
+  var length = keys.length;
+  var index = 0;
+  var key;
+  while (length > index) definePropertyModule.f(O, key = keys[index++], props[key]);
+  return O;
 };
 
 
@@ -4706,6 +3543,27 @@ module.exports = function (object, names) {
 
 /***/ }),
 
+/***/ "../node_modules/core-js/internals/object-keys.js":
+/*!********************************************************!*\
+  !*** ../node_modules/core-js/internals/object-keys.js ***!
+  \********************************************************/
+/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+
+"use strict";
+
+var internalObjectKeys = __webpack_require__(/*! ../internals/object-keys-internal */ "../node_modules/core-js/internals/object-keys-internal.js");
+var enumBugKeys = __webpack_require__(/*! ../internals/enum-bug-keys */ "../node_modules/core-js/internals/enum-bug-keys.js");
+
+// `Object.keys` method
+// https://tc39.es/ecma262/#sec-object.keys
+// eslint-disable-next-line es/no-object-keys -- safe
+module.exports = Object.keys || function keys(O) {
+  return internalObjectKeys(O, enumBugKeys);
+};
+
+
+/***/ }),
+
 /***/ "../node_modules/core-js/internals/object-property-is-enumerable.js":
 /*!**************************************************************************!*\
   !*** ../node_modules/core-js/internals/object-property-is-enumerable.js ***!
@@ -4727,44 +3585,6 @@ exports.f = NASHORN_BUG ? function propertyIsEnumerable(V) {
   var descriptor = getOwnPropertyDescriptor(this, V);
   return !!descriptor && descriptor.enumerable;
 } : $propertyIsEnumerable;
-
-
-/***/ }),
-
-/***/ "../node_modules/core-js/internals/object-set-prototype-of.js":
-/*!********************************************************************!*\
-  !*** ../node_modules/core-js/internals/object-set-prototype-of.js ***!
-  \********************************************************************/
-/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
-
-"use strict";
-
-/* eslint-disable no-proto -- safe */
-var uncurryThisAccessor = __webpack_require__(/*! ../internals/function-uncurry-this-accessor */ "../node_modules/core-js/internals/function-uncurry-this-accessor.js");
-var anObject = __webpack_require__(/*! ../internals/an-object */ "../node_modules/core-js/internals/an-object.js");
-var aPossiblePrototype = __webpack_require__(/*! ../internals/a-possible-prototype */ "../node_modules/core-js/internals/a-possible-prototype.js");
-
-// `Object.setPrototypeOf` method
-// https://tc39.es/ecma262/#sec-object.setprototypeof
-// Works with __proto__ only. Old v8 can't work with null proto objects.
-// eslint-disable-next-line es/no-object-setprototypeof -- safe
-module.exports = Object.setPrototypeOf || ('__proto__' in {} ? function () {
-  var CORRECT_SETTER = false;
-  var test = {};
-  var setter;
-  try {
-    setter = uncurryThisAccessor(Object.prototype, '__proto__', 'set');
-    setter(test, []);
-    CORRECT_SETTER = test instanceof Array;
-  } catch (error) { /* empty */ }
-  return function setPrototypeOf(O, proto) {
-    anObject(O);
-    aPossiblePrototype(proto);
-    if (CORRECT_SETTER) setter(O, proto);
-    else O.__proto__ = proto;
-    return O;
-  };
-}() : undefined);
 
 
 /***/ }),
@@ -4817,27 +3637,6 @@ module.exports = getBuiltIn('Reflect', 'ownKeys') || function ownKeys(it) {
   var keys = getOwnPropertyNamesModule.f(anObject(it));
   var getOwnPropertySymbols = getOwnPropertySymbolsModule.f;
   return getOwnPropertySymbols ? concat(keys, getOwnPropertySymbols(it)) : keys;
-};
-
-
-/***/ }),
-
-/***/ "../node_modules/core-js/internals/proxy-accessor.js":
-/*!***********************************************************!*\
-  !*** ../node_modules/core-js/internals/proxy-accessor.js ***!
-  \***********************************************************/
-/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
-
-"use strict";
-
-var defineProperty = (__webpack_require__(/*! ../internals/object-define-property */ "../node_modules/core-js/internals/object-define-property.js").f);
-
-module.exports = function (Target, Source, key) {
-  key in Target || defineProperty(Target, key, {
-    configurable: true,
-    get: function () { return Source[key]; },
-    set: function (it) { Source[key] = it; }
-  });
 };
 
 
@@ -5122,46 +3921,6 @@ module.exports = function (argument) {
 
 /***/ }),
 
-/***/ "../node_modules/core-js/internals/to-string-tag-support.js":
-/*!******************************************************************!*\
-  !*** ../node_modules/core-js/internals/to-string-tag-support.js ***!
-  \******************************************************************/
-/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
-
-"use strict";
-
-var wellKnownSymbol = __webpack_require__(/*! ../internals/well-known-symbol */ "../node_modules/core-js/internals/well-known-symbol.js");
-
-var TO_STRING_TAG = wellKnownSymbol('toStringTag');
-var test = {};
-
-test[TO_STRING_TAG] = 'z';
-
-module.exports = String(test) === '[object z]';
-
-
-/***/ }),
-
-/***/ "../node_modules/core-js/internals/to-string.js":
-/*!******************************************************!*\
-  !*** ../node_modules/core-js/internals/to-string.js ***!
-  \******************************************************/
-/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
-
-"use strict";
-
-var classof = __webpack_require__(/*! ../internals/classof */ "../node_modules/core-js/internals/classof.js");
-
-var $String = String;
-
-module.exports = function (argument) {
-  if (classof(argument) === 'Symbol') throw TypeError('Cannot convert a Symbol value to a string');
-  return $String(argument);
-};
-
-
-/***/ }),
-
 /***/ "../node_modules/core-js/internals/try-to-string.js":
 /*!**********************************************************!*\
   !*** ../node_modules/core-js/internals/try-to-string.js ***!
@@ -5294,172 +4053,89 @@ module.exports = function (name) {
 
 /***/ }),
 
-/***/ "../node_modules/core-js/internals/wrap-error-constructor-with-cause.js":
-/*!******************************************************************************!*\
-  !*** ../node_modules/core-js/internals/wrap-error-constructor-with-cause.js ***!
-  \******************************************************************************/
-/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
-
-"use strict";
-
-var getBuiltIn = __webpack_require__(/*! ../internals/get-built-in */ "../node_modules/core-js/internals/get-built-in.js");
-var hasOwn = __webpack_require__(/*! ../internals/has-own-property */ "../node_modules/core-js/internals/has-own-property.js");
-var createNonEnumerableProperty = __webpack_require__(/*! ../internals/create-non-enumerable-property */ "../node_modules/core-js/internals/create-non-enumerable-property.js");
-var isPrototypeOf = __webpack_require__(/*! ../internals/object-is-prototype-of */ "../node_modules/core-js/internals/object-is-prototype-of.js");
-var setPrototypeOf = __webpack_require__(/*! ../internals/object-set-prototype-of */ "../node_modules/core-js/internals/object-set-prototype-of.js");
-var copyConstructorProperties = __webpack_require__(/*! ../internals/copy-constructor-properties */ "../node_modules/core-js/internals/copy-constructor-properties.js");
-var proxyAccessor = __webpack_require__(/*! ../internals/proxy-accessor */ "../node_modules/core-js/internals/proxy-accessor.js");
-var inheritIfRequired = __webpack_require__(/*! ../internals/inherit-if-required */ "../node_modules/core-js/internals/inherit-if-required.js");
-var normalizeStringArgument = __webpack_require__(/*! ../internals/normalize-string-argument */ "../node_modules/core-js/internals/normalize-string-argument.js");
-var installErrorCause = __webpack_require__(/*! ../internals/install-error-cause */ "../node_modules/core-js/internals/install-error-cause.js");
-var installErrorStack = __webpack_require__(/*! ../internals/error-stack-install */ "../node_modules/core-js/internals/error-stack-install.js");
-var DESCRIPTORS = __webpack_require__(/*! ../internals/descriptors */ "../node_modules/core-js/internals/descriptors.js");
-var IS_PURE = __webpack_require__(/*! ../internals/is-pure */ "../node_modules/core-js/internals/is-pure.js");
-
-module.exports = function (FULL_NAME, wrapper, FORCED, IS_AGGREGATE_ERROR) {
-  var STACK_TRACE_LIMIT = 'stackTraceLimit';
-  var OPTIONS_POSITION = IS_AGGREGATE_ERROR ? 2 : 1;
-  var path = FULL_NAME.split('.');
-  var ERROR_NAME = path[path.length - 1];
-  var OriginalError = getBuiltIn.apply(null, path);
-
-  if (!OriginalError) return;
-
-  var OriginalErrorPrototype = OriginalError.prototype;
-
-  // V8 9.3- bug https://bugs.chromium.org/p/v8/issues/detail?id=12006
-  if (!IS_PURE && hasOwn(OriginalErrorPrototype, 'cause')) delete OriginalErrorPrototype.cause;
-
-  if (!FORCED) return OriginalError;
-
-  var BaseError = getBuiltIn('Error');
-
-  var WrappedError = wrapper(function (a, b) {
-    var message = normalizeStringArgument(IS_AGGREGATE_ERROR ? b : a, undefined);
-    var result = IS_AGGREGATE_ERROR ? new OriginalError(a) : new OriginalError();
-    if (message !== undefined) createNonEnumerableProperty(result, 'message', message);
-    installErrorStack(result, WrappedError, result.stack, 2);
-    if (this && isPrototypeOf(OriginalErrorPrototype, this)) inheritIfRequired(result, this, WrappedError);
-    if (arguments.length > OPTIONS_POSITION) installErrorCause(result, arguments[OPTIONS_POSITION]);
-    return result;
-  });
-
-  WrappedError.prototype = OriginalErrorPrototype;
-
-  if (ERROR_NAME !== 'Error') {
-    if (setPrototypeOf) setPrototypeOf(WrappedError, BaseError);
-    else copyConstructorProperties(WrappedError, BaseError, { name: true });
-  } else if (DESCRIPTORS && STACK_TRACE_LIMIT in OriginalError) {
-    proxyAccessor(WrappedError, OriginalError, STACK_TRACE_LIMIT);
-    proxyAccessor(WrappedError, OriginalError, 'prepareStackTrace');
-  }
-
-  copyConstructorProperties(WrappedError, OriginalError);
-
-  if (!IS_PURE) try {
-    // Safari 13- bug: WebAssembly errors does not have a proper `.name`
-    if (OriginalErrorPrototype.name !== ERROR_NAME) {
-      createNonEnumerableProperty(OriginalErrorPrototype, 'name', ERROR_NAME);
-    }
-    OriginalErrorPrototype.constructor = WrappedError;
-  } catch (error) { /* empty */ }
-
-  return WrappedError;
-};
-
-
-/***/ }),
-
-/***/ "../node_modules/core-js/modules/es.error.cause.js":
-/*!*********************************************************!*\
-  !*** ../node_modules/core-js/modules/es.error.cause.js ***!
-  \*********************************************************/
+/***/ "../node_modules/core-js/modules/es.array.includes.js":
+/*!************************************************************!*\
+  !*** ../node_modules/core-js/modules/es.array.includes.js ***!
+  \************************************************************/
 /***/ ((__unused_webpack_module, __unused_webpack_exports, __webpack_require__) => {
 
 "use strict";
 
-/* eslint-disable no-unused-vars -- required for functions `.length` */
 var $ = __webpack_require__(/*! ../internals/export */ "../node_modules/core-js/internals/export.js");
-var global = __webpack_require__(/*! ../internals/global */ "../node_modules/core-js/internals/global.js");
-var apply = __webpack_require__(/*! ../internals/function-apply */ "../node_modules/core-js/internals/function-apply.js");
-var wrapErrorConstructorWithCause = __webpack_require__(/*! ../internals/wrap-error-constructor-with-cause */ "../node_modules/core-js/internals/wrap-error-constructor-with-cause.js");
+var $includes = (__webpack_require__(/*! ../internals/array-includes */ "../node_modules/core-js/internals/array-includes.js").includes);
+var fails = __webpack_require__(/*! ../internals/fails */ "../node_modules/core-js/internals/fails.js");
+var addToUnscopables = __webpack_require__(/*! ../internals/add-to-unscopables */ "../node_modules/core-js/internals/add-to-unscopables.js");
 
-var WEB_ASSEMBLY = 'WebAssembly';
-var WebAssembly = global[WEB_ASSEMBLY];
+// FF99+ bug
+var BROKEN_ON_SPARSE = fails(function () {
+  // eslint-disable-next-line es/no-array-prototype-includes -- detection
+  return !Array(1).includes();
+});
 
-var FORCED = Error('e', { cause: 7 }).cause !== 7;
-
-var exportGlobalErrorCauseWrapper = function (ERROR_NAME, wrapper) {
-  var O = {};
-  O[ERROR_NAME] = wrapErrorConstructorWithCause(ERROR_NAME, wrapper, FORCED);
-  $({ global: true, constructor: true, arity: 1, forced: FORCED }, O);
-};
-
-var exportWebAssemblyErrorCauseWrapper = function (ERROR_NAME, wrapper) {
-  if (WebAssembly && WebAssembly[ERROR_NAME]) {
-    var O = {};
-    O[ERROR_NAME] = wrapErrorConstructorWithCause(WEB_ASSEMBLY + '.' + ERROR_NAME, wrapper, FORCED);
-    $({ target: WEB_ASSEMBLY, stat: true, constructor: true, arity: 1, forced: FORCED }, O);
+// `Array.prototype.includes` method
+// https://tc39.es/ecma262/#sec-array.prototype.includes
+$({ target: 'Array', proto: true, forced: BROKEN_ON_SPARSE }, {
+  includes: function includes(el /* , fromIndex = 0 */) {
+    return $includes(this, el, arguments.length > 1 ? arguments[1] : undefined);
   }
-};
+});
 
-// https://tc39.es/ecma262/#sec-nativeerror
-exportGlobalErrorCauseWrapper('Error', function (init) {
-  return function Error(message) { return apply(init, this, arguments); };
-});
-exportGlobalErrorCauseWrapper('EvalError', function (init) {
-  return function EvalError(message) { return apply(init, this, arguments); };
-});
-exportGlobalErrorCauseWrapper('RangeError', function (init) {
-  return function RangeError(message) { return apply(init, this, arguments); };
-});
-exportGlobalErrorCauseWrapper('ReferenceError', function (init) {
-  return function ReferenceError(message) { return apply(init, this, arguments); };
-});
-exportGlobalErrorCauseWrapper('SyntaxError', function (init) {
-  return function SyntaxError(message) { return apply(init, this, arguments); };
-});
-exportGlobalErrorCauseWrapper('TypeError', function (init) {
-  return function TypeError(message) { return apply(init, this, arguments); };
-});
-exportGlobalErrorCauseWrapper('URIError', function (init) {
-  return function URIError(message) { return apply(init, this, arguments); };
-});
-exportWebAssemblyErrorCauseWrapper('CompileError', function (init) {
-  return function CompileError(message) { return apply(init, this, arguments); };
-});
-exportWebAssemblyErrorCauseWrapper('LinkError', function (init) {
-  return function LinkError(message) { return apply(init, this, arguments); };
-});
-exportWebAssemblyErrorCauseWrapper('RuntimeError', function (init) {
-  return function RuntimeError(message) { return apply(init, this, arguments); };
-});
+// https://tc39.es/ecma262/#sec-array.prototype-@@unscopables
+addToUnscopables('includes');
 
 
 /***/ }),
 
-/***/ "../node_modules/@babel/runtime/helpers/defineProperty.js":
-/*!****************************************************************!*\
-  !*** ../node_modules/@babel/runtime/helpers/defineProperty.js ***!
-  \****************************************************************/
-/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
+/***/ "../node_modules/core-js/modules/es.array.push.js":
+/*!********************************************************!*\
+  !*** ../node_modules/core-js/modules/es.array.push.js ***!
+  \********************************************************/
+/***/ ((__unused_webpack_module, __unused_webpack_exports, __webpack_require__) => {
 
-var toPropertyKey = __webpack_require__(/*! ./toPropertyKey.js */ "../node_modules/@babel/runtime/helpers/toPropertyKey.js");
-function _defineProperty(obj, key, value) {
-  key = toPropertyKey(key);
-  if (key in obj) {
-    Object.defineProperty(obj, key, {
-      value: value,
-      enumerable: true,
-      configurable: true,
-      writable: true
-    });
-  } else {
-    obj[key] = value;
+"use strict";
+
+var $ = __webpack_require__(/*! ../internals/export */ "../node_modules/core-js/internals/export.js");
+var toObject = __webpack_require__(/*! ../internals/to-object */ "../node_modules/core-js/internals/to-object.js");
+var lengthOfArrayLike = __webpack_require__(/*! ../internals/length-of-array-like */ "../node_modules/core-js/internals/length-of-array-like.js");
+var setArrayLength = __webpack_require__(/*! ../internals/array-set-length */ "../node_modules/core-js/internals/array-set-length.js");
+var doesNotExceedSafeInteger = __webpack_require__(/*! ../internals/does-not-exceed-safe-integer */ "../node_modules/core-js/internals/does-not-exceed-safe-integer.js");
+var fails = __webpack_require__(/*! ../internals/fails */ "../node_modules/core-js/internals/fails.js");
+
+var INCORRECT_TO_LENGTH = fails(function () {
+  return [].push.call({ length: 0x100000000 }, 1) !== 4294967297;
+});
+
+// V8 and Safari <= 15.4, FF < 23 throws InternalError
+// https://bugs.chromium.org/p/v8/issues/detail?id=12681
+var properErrorOnNonWritableLength = function () {
+  try {
+    // eslint-disable-next-line es/no-object-defineproperty -- safe
+    Object.defineProperty([], 'length', { writable: false }).push();
+  } catch (error) {
+    return error instanceof TypeError;
   }
-  return obj;
-}
-module.exports = _defineProperty, module.exports.__esModule = true, module.exports["default"] = module.exports;
+};
+
+var FORCED = INCORRECT_TO_LENGTH || !properErrorOnNonWritableLength();
+
+// `Array.prototype.push` method
+// https://tc39.es/ecma262/#sec-array.prototype.push
+$({ target: 'Array', proto: true, arity: 1, forced: FORCED }, {
+  // eslint-disable-next-line no-unused-vars -- required for `.length`
+  push: function push(item) {
+    var O = toObject(this);
+    var len = lengthOfArrayLike(O);
+    var argCount = arguments.length;
+    doesNotExceedSafeInteger(len + argCount);
+    for (var i = 0; i < argCount; i++) {
+      O[len] = arguments[i];
+      len++;
+    }
+    setArrayLength(O, len);
+    return len;
+  }
+});
+
 
 /***/ }),
 
@@ -5469,68 +4145,12 @@ module.exports = _defineProperty, module.exports.__esModule = true, module.expor
   \***********************************************************************/
 /***/ ((module) => {
 
-function _interopRequireDefault(obj) {
-  return obj && obj.__esModule ? obj : {
-    "default": obj
+function _interopRequireDefault(e) {
+  return e && e.__esModule ? e : {
+    "default": e
   };
 }
 module.exports = _interopRequireDefault, module.exports.__esModule = true, module.exports["default"] = module.exports;
-
-/***/ }),
-
-/***/ "../node_modules/@babel/runtime/helpers/toPrimitive.js":
-/*!*************************************************************!*\
-  !*** ../node_modules/@babel/runtime/helpers/toPrimitive.js ***!
-  \*************************************************************/
-/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
-
-var _typeof = (__webpack_require__(/*! ./typeof.js */ "../node_modules/@babel/runtime/helpers/typeof.js")["default"]);
-function toPrimitive(t, r) {
-  if ("object" != _typeof(t) || !t) return t;
-  var e = t[Symbol.toPrimitive];
-  if (void 0 !== e) {
-    var i = e.call(t, r || "default");
-    if ("object" != _typeof(i)) return i;
-    throw new TypeError("@@toPrimitive must return a primitive value.");
-  }
-  return ("string" === r ? String : Number)(t);
-}
-module.exports = toPrimitive, module.exports.__esModule = true, module.exports["default"] = module.exports;
-
-/***/ }),
-
-/***/ "../node_modules/@babel/runtime/helpers/toPropertyKey.js":
-/*!***************************************************************!*\
-  !*** ../node_modules/@babel/runtime/helpers/toPropertyKey.js ***!
-  \***************************************************************/
-/***/ ((module, __unused_webpack_exports, __webpack_require__) => {
-
-var _typeof = (__webpack_require__(/*! ./typeof.js */ "../node_modules/@babel/runtime/helpers/typeof.js")["default"]);
-var toPrimitive = __webpack_require__(/*! ./toPrimitive.js */ "../node_modules/@babel/runtime/helpers/toPrimitive.js");
-function toPropertyKey(t) {
-  var i = toPrimitive(t, "string");
-  return "symbol" == _typeof(i) ? i : String(i);
-}
-module.exports = toPropertyKey, module.exports.__esModule = true, module.exports["default"] = module.exports;
-
-/***/ }),
-
-/***/ "../node_modules/@babel/runtime/helpers/typeof.js":
-/*!********************************************************!*\
-  !*** ../node_modules/@babel/runtime/helpers/typeof.js ***!
-  \********************************************************/
-/***/ ((module) => {
-
-function _typeof(o) {
-  "@babel/helpers - typeof";
-
-  return (module.exports = _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) {
-    return typeof o;
-  } : function (o) {
-    return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o;
-  }, module.exports.__esModule = true, module.exports["default"] = module.exports), _typeof(o);
-}
-module.exports = _typeof, module.exports.__esModule = true, module.exports["default"] = module.exports;
 
 /***/ })
 
