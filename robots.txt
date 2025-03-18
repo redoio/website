@@ -4,6 +4,7 @@ Disallow: /feed/
 Disallow: /comments/feed/
 Disallow: /index.php/feed/
 Disallow: /index.php/comments/feed/
+
 Allow: /
 
 Sitemap: https://www.redoio.info/sitemap.xml
