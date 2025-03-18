@@ -1,5 +1,9 @@
 User-agent: *
 Disallow: /wp-admin/
+Disallow: /feed/
+Disallow: /comments/feed/
+Disallow: /index.php/feed/
+Disallow: /index.php/comments/feed/
 Allow: /
 
 Sitemap: https://redoio.info/sitemap.xml
