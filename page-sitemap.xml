@@ -2,18 +2,21 @@
 <urlset xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1" xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9 http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd http://www.google.com/schemas/sitemap-image/1.1 http://www.google.com/schemas/sitemap-image/1.1/sitemap-image.xsd" xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 	<url>
 		<loc>./index.html</loc>
-		<lastmod>2025-03-17T16:56:05+00:00</lastmod>
+		<lastmod>2025-03-27T21:15:32+00:00</lastmod>
 		<image:image>
-			<image:loc>./wp-content/uploads/2024/08/336642644-9f405081-081a-4716-b8a6-f90f840fa8f5.jpg</image:loc>
+			<image:loc>./wp-content/uploads/2024/12/JTA_logo-drk-300x82.png</image:loc>
 		</image:image>
 		<image:image>
-			<image:loc>./wp-content/uploads/2024/12/JTA_logo-drk.png</image:loc>
+			<image:loc>./wp-content/uploads/2025/01/office-of-the-state-public-defender-logo-300x127.jpg</image:loc>
 		</image:image>
 		<image:image>
-			<image:loc>./wp-content/uploads/2024/09/lexlab.png</image:loc>
+			<image:loc>./wp-content/uploads/2024/12/Dream.org-Logo-286x300.jpg</image:loc>
 		</image:image>
 		<image:image>
-			<image:loc>./wp-content/uploads/2024/12/Dream.org-Logo.jpg</image:loc>
+			<image:loc>./wp-content/uploads/2024/08/Stanford-300x183.jpeg</image:loc>
+		</image:image>
+		<image:image>
+			<image:loc>./wp-content/uploads/2024/09/lexlab-e1742930776518.png</image:loc>
 		</image:image>
 		<image:image>
 			<image:loc>./wp-content/uploads/2024/08/336642644-9f405081-081a-4716-b8a6-f90f840fa8f5.jpg</image:loc>
@@ -33,7 +36,7 @@
 	</url>
 	<url>
 		<loc>./projects/index.html</loc>
-		<lastmod>2025-03-18T04:10:14+00:00</lastmod>
+		<lastmod>2025-03-28T00:56:38+00:00</lastmod>
 		<image:image>
 			<image:loc>./wp-content/uploads/2024/08/336642644-9f405081-081a-4716-b8a6-f90f840fa8f5.jpg</image:loc>
 		</image:image>
