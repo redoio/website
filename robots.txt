@@ -8,4 +8,4 @@ Disallow: /index.php/comments/feed/
 Allow: /
 
 # Sitemap location
-Sitemap: https://www.redoio.info/sitemap.xml
+Sitemap: https://www.redoio.info/sitemap_index.xml

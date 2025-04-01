@@ -1,50 +1,50 @@
 <?xml version="1.0" encoding="UTF-8"?><?xml-stylesheet type="text/xsl" href="./main-sitemap.xsl"?>
 <urlset xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1" xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9 http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd http://www.google.com/schemas/sitemap-image/1.1 http://www.google.com/schemas/sitemap-image/1.1/sitemap-image.xsd" xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 	<url>
-		<loc>./index.html</loc>
+		<loc>https://www.redoio.info</loc>
 		<lastmod>2025-03-27T21:15:32+00:00</lastmod>
 		<image:image>
-			<image:loc>./wp-content/uploads/2024/12/JTA_logo-drk-300x82.png</image:loc>
+			<image:loc>https://www.redoio.info/wp-content/uploads/2024/12/JTA_logo-drk-300x82.png</image:loc>
 		</image:image>
 		<image:image>
-			<image:loc>./wp-content/uploads/2025/01/office-of-the-state-public-defender-logo-300x127.jpg</image:loc>
+			<image:loc>https://www.redoio.info/wp-content/uploads/2025/01/office-of-the-state-public-defender-logo-300x127.jpg</image:loc>
 		</image:image>
 		<image:image>
-			<image:loc>./wp-content/uploads/2024/12/Dream.org-Logo-286x300.jpg</image:loc>
+			<image:loc>https://www.redoio.info/wp-content/uploads/2024/12/Dream.org-Logo-286x300.jpg</image:loc>
 		</image:image>
 		<image:image>
-			<image:loc>./wp-content/uploads/2024/08/Stanford-300x183.jpeg</image:loc>
+			<image:loc>https://www.redoio.info/wp-content/uploads/2024/08/Stanford-300x183.jpeg</image:loc>
 		</image:image>
 		<image:image>
-			<image:loc>./wp-content/uploads/2024/09/lexlab-e1742930776518.png</image:loc>
+			<image:loc>https://www.redoio.info/wp-content/uploads/2024/09/lexlab-e1742930776518.png</image:loc>
 		</image:image>
 		<image:image>
-			<image:loc>./wp-content/uploads/2024/08/336642644-9f405081-081a-4716-b8a6-f90f840fa8f5.jpg</image:loc>
+			<image:loc>https://www.redoio.info/wp-content/uploads/2024/08/336642644-9f405081-081a-4716-b8a6-f90f840fa8f5.jpg</image:loc>
 		</image:image>
 		<image:image>
-			<image:loc>./wp-content/uploads/2024/10/Screenshot-2024-10-14-173913-modified.png</image:loc>
+			<image:loc>https://www.redoio.info/wp-content/uploads/2024/10/Screenshot-2024-10-14-173913-modified.png</image:loc>
 		</image:image>
 		<image:image>
-			<image:loc>./wp-content/uploads/2024/12/Maya-Headshot-modified.png</image:loc>
+			<image:loc>https://www.redoio.info/wp-content/uploads/2024/12/Maya-Headshot-modified.png</image:loc>
 		</image:image>
 		<image:image>
-			<image:loc>./wp-content/uploads/2024/10/aparna-modified.png</image:loc>
+			<image:loc>https://www.redoio.info/wp-content/uploads/2024/10/aparna-modified.png</image:loc>
 		</image:image>
 		<image:image>
-			<image:loc>./wp-content/uploads/2025/02/ChristineDeniseHead.png</image:loc>
+			<image:loc>https://www.redoio.info/wp-content/uploads/2025/02/ChristineDeniseHead.png</image:loc>
 		</image:image>
 	</url>
 	<url>
-		<loc>./projects/index.html</loc>
+		<loc>https://www.redoio.info/projects/</loc>
 		<lastmod>2025-03-28T00:56:38+00:00</lastmod>
 		<image:image>
-			<image:loc>./wp-content/uploads/2024/08/336642644-9f405081-081a-4716-b8a6-f90f840fa8f5.jpg</image:loc>
+			<image:loc>https://www.redoio.info/wp-content/uploads/2024/08/336642644-9f405081-081a-4716-b8a6-f90f840fa8f5.jpg</image:loc>
 		</image:image>
 		<image:image>
-			<image:loc>./wp-content/uploads/2025/01/office-of-the-state-public-defender-logo-1024x434.jpg</image:loc>
+			<image:loc>https://www.redoio.info/wp-content/uploads/2025/01/office-of-the-state-public-defender-logo-1024x434.jpg</image:loc>
 		</image:image>
 		<image:image>
-			<image:loc>./wp-content/uploads/2024/08/336642644-9f405081-081a-4716-b8a6-f90f840fa8f5.jpg</image:loc>
+			<image:loc>https://www.redoio.info/wp-content/uploads/2024/08/336642644-9f405081-081a-4716-b8a6-f90f840fa8f5.jpg</image:loc>
 		</image:image>
 	</url>
 </urlset>
