@@ -1,2 +1,6 @@
 User-agent: *
-Disallow: /
+Disallow: /wp-content/
+Disallow: /wp-includes/
+Disallow: /wp-json/
+
+Sitemap: https://www.redoio.info/wp-sitemap.xml
