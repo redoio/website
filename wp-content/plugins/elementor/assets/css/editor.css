@@ -1,4 +1,4 @@
-/*! elementor - v3.28.0 - 23-03-2025 */
+/*! elementor - v3.28.0 - 01-04-2025 */
 .elementor-control-unit-1 {
   width: 27px;
 }
@@ -2125,13 +2125,13 @@ body:not(.elementor-device-mobile) .elementor-control.elementor-control-responsi
 }
 
 .elementor-group-control-blur .elementor-slider {
-  background: url("./../images/blur.png");
+  background: url("../images/blur.png");
   background-size: cover;
   background-position: center;
 }
 
 .elementor-group-control-contrast .elementor-slider {
-  background: url("./../images/contrast.png");
+  background: url("../images/contrast.png");
   background-size: 100% 100%;
 }
 
